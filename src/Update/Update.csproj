@@ -15,13 +15,35 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.0.0-preview.3" />
-    <PackageReference Include="Vanara.PInvoke.User32" Version="3.3.14" />
-    <PackageReference Include="Vanara.PInvoke.SHCore" Version="3.3.14" />
+    <ProjectReference Include="..\Squirrel\Squirrel.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Squirrel\Squirrel.csproj" />
+    <PackageReference Include="NLog" Version="5.0.0-preview.3" />
+    <PackageReference Include="Vanara.PInvoke.User32" Version="3.3.14" />
+    <PackageReference Include="Vanara.PInvoke.SHCore" Version="3.3.14" />
+    <PackageReference Include="NuGet.Packaging" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- All of this from NuGet.Packaging -->
+    <TrimmableAssembly Include="NuGet.Common" />
+    <TrimmableAssembly Include="NuGet.Packaging" />
+    <TrimmableAssembly Include="NuGet.Configuration" />
+    <TrimmableAssembly Include="NuGet.Versioning" />
+    <TrimmableAssembly Include="Newtonsoft.Json" />
+
+    <!-- PInvoke for User32SplashWindow -->
+    <TrimmableAssembly Include="Vanara.Core" />
+    <TrimmableAssembly Include="Vanara.PInvoke.Gdi32" />
+    <TrimmableAssembly Include="Vanara.PInvoke.Kernel32" />
+    <TrimmableAssembly Include="Vanara.PInvoke.Shared" />
+    <TrimmableAssembly Include="Vanara.PInvoke.SHCore" />
+    <TrimmableAssembly Include="Vanara.PInvoke.User32" />
+
+    <!-- Other -->
+    <TrimmableAssembly Include="NLog" />
+    <TrimmableAssembly Include="SharpCompress" />
   </ItemGroup>
 
 </Project>

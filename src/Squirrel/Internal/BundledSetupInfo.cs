@@ -28,7 +28,6 @@ namespace Squirrel.Lib
             bundle.BundledPackageName = ReadString(reader, 204);
             bundle.BundledPackageBytes = ReadBytes(reader, 205);
             bundle.SetupIconBytes = ReadBytes(reader, 206);
-
             return bundle;
         }
 
