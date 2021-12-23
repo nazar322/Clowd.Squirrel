@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -125,7 +125,9 @@ namespace SquirrelCli
                 Directory.CreateDirectory(targetDir);
             }
 
-            var signingOpts = options.signParams;
+            var signexe = new SigntoolArgumentGenerator(options.GetArgsForSignTool);
+            var signpackage = new NugetSignArgumentGenerator(options.GetArgsForNugetSign);
+
             var package = options.package;
             var baseUrl = options.baseUrl;
             var generateDeltas = !options.noDelta;
@@ -159,7 +161,7 @@ namespace SquirrelCli
             }
 
             // Sign Update.exe so that virus scanners don't think we're pulling one over on them
-            HelperExe.SignPEFile(updatePath, signingOpts).Wait();
+            HelperExe.SignPEFile(new[] { updatePath }, signexe).Wait();
 
             // copy input package to target output directory
             var di = new DirectoryInfo(targetDir);
@@ -202,14 +204,22 @@ namespace SquirrelCli
                         .Where(x => !x.Name.Contains("squirrel.exe", StringComparison.InvariantCultureIgnoreCase))
                         .Where(x => Utility.IsFileTopLevelInPackage(x.FullName, pkgPath))
                         .Where(x => Utility.ExecutableUsesWin32Subsystem(x.FullName))
+                        .ToArray() // so we don't continue iterating over created stubs in the next command
                         .ForEachAsync(x => createExecutableStubForExe(x.FullName))
                         .Wait();
 
-                    // sign all exe's in this package
-                    new DirectoryInfo(pkgPath).GetAllFilesRecursively()
+                    // sign all exe's in this package, in chunks of 10 at a time
+                    var filesToSign = new DirectoryInfo(pkgPath).GetAllFilesRecursively()
                         .Where(x => Utility.FileIsLikelyPEImage(x.Name))
-                        .ForEachAsync(x => HelperExe.SignPEFile(x.FullName, signingOpts))
-                        .Wait();
+                        .Select(x => x.FullName)
+                        .Select((s, i) => new { Value = s, Index = i })
+                        .GroupBy(x => x.Index / 10)
+                        .Select(grp => grp.Select(x => x.Value).ToArray())
+                        .ToArray();
+
+                    foreach(var chunk in filesToSign) {
+                        HelperExe.SignPEFile(chunk, signexe).Wait();
+                    }
 
                     // copy Update.exe into package, so it can also be updated in both full/delta packages
                     File.Copy(updatePath, Path.Combine(libDir, "Squirrel.exe"), true);
@@ -239,6 +249,8 @@ namespace SquirrelCli
                         }
                     }
                 });
+
+                HelperExe.NugetSign(rp.ReleasePackageFile, signpackage).Wait();
 
                 processed.Add(rp.ReleasePackageFile);
 
@@ -286,12 +298,12 @@ namespace SquirrelCli
 
             infosave.WriteToFile(targetSetupExe);
 
-            HelperExe.SignPEFile(targetSetupExe, signingOpts).Wait();
+            HelperExe.SignPEFile(new[] { targetSetupExe }, signexe).Wait();
 
             if (!String.IsNullOrEmpty(options.msi)) {
                 bool x64 = options.msi.Equals("x64");
                 createMsiPackage(targetSetupExe, new ZipPackage(package), x64).Wait();
-                HelperExe.SignPEFile(targetSetupExe.Replace(".exe", ".msi"), signingOpts).Wait();
+                HelperExe.SignPEFile(new[] { targetSetupExe.Replace(".exe", ".msi") }, signexe).Wait();
             }
 
             Log.Info("Done");

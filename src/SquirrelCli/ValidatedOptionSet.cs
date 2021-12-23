@@ -21,6 +21,15 @@ namespace SquirrelCli
 
     internal abstract class ValidatedOptionSet : OptionSet
     {
+        protected virtual int ToInt(string propertyName, string argValue, int min = int.MinValue, int max = int.MaxValue)
+        {
+            if (int.TryParse(argValue, out var v) && v >= min && v <= max) {
+                return v;
+            }
+
+            throw new OptionValidationException($"Argument '{propertyName}': Must be an integer between between {min}-{max}. Actual value: '{argValue}'.");
+        }
+
         protected virtual bool IsNullOrDefault(string propertyName)
         {
             var p = this.GetType().GetProperty(propertyName);

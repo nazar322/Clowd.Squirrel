@@ -13,6 +13,9 @@ using Squirrel.SimpleSplat;
 
 namespace Squirrel
 {
+    internal delegate string SigntoolArgumentGenerator(string[] listOfExe, bool hideSensitive);
+    internal delegate string NugetSignArgumentGenerator(string exePath, bool hideSensitive);
+
     internal static class HelperExe
     {
         public static string SetupPath => FindHelperExecutable("Setup.exe", _searchPaths);
@@ -163,34 +166,60 @@ namespace Squirrel
             }
         }
 
-        public static async Task SignPEFile(string exePath, string signingOpts)
+        public static async Task SignPEFile(string[] listOfExe, SigntoolArgumentGenerator argsFn)
         {
-            if (String.IsNullOrEmpty(signingOpts)) {
-                Log.Debug("{0} was not signed.", exePath);
+            var args = argsFn(listOfExe, false);
+            if (String.IsNullOrEmpty(args)) {
+                //Log.Debug("{0} was not signed.", exePath);
                 return;
             }
 
-            try {
-                if (AuthenticodeTools.IsTrusted(exePath)) {
-                    Log.Info("{0} is already signed, skipping...", exePath);
-                    return;
+            List<string> toSign = new List<string>();
+            foreach (var exe in listOfExe) {
+                try {
+                    if (AuthenticodeTools.IsTrusted(exe)) {
+                        Log.Info("{0} is already signed, skipping...", exe);
+                        return;
+                    }
+                    toSign.Add(exe);
+                } catch (Exception ex) {
+                    Log.ErrorException("Failed to determine signing status for " + exe, ex);
                 }
-            } catch (Exception ex) {
-                Log.ErrorException("Failed to determine signing status for " + exePath, ex);
             }
 
-            Log.Info("About to sign {0}", exePath);
+            args = argsFn(toSign.ToArray(), false);
 
-            var psi = Utility.CreateProcessStartInfo(SignToolPath, $"sign {signingOpts} \"{exePath}\"");
+            var psi = Utility.CreateProcessStartInfo(SignToolPath, $"sign {args}");
             var processResult = await Utility.InvokeProcessUnsafeAsync(psi, CancellationToken.None);
 
             if (processResult.ExitCode != 0) {
-                var optsWithPasswordHidden = new Regex(@"/p\s+\w+").Replace(signingOpts, "/p ********");
-                var msg = String.Format("Failed to sign, command invoked was: '{0} sign {1} {2}'\r\n{3}",
-                    SignToolPath, optsWithPasswordHidden, exePath, processResult.StdOutput);
-                throw new Exception(msg);
+                var argsSafe = argsFn(toSign.ToArray(), true);
+                throw new Exception($"Signing return error code {processResult.ExitCode}. Command invoked was '{SignToolPath} sign {argsSafe}'. Output was: {processResult.StdOutput}");
             } else {
-                Log.Info("Sign successful: " + processResult.StdOutput);
+                foreach (var f in toSign)
+                    Log.Info("Signed Successfully: " + f);
+                Log.Debug(processResult.StdOutput);
+            }
+        }
+
+        public static async Task NugetSign(string packagePath, NugetSignArgumentGenerator argsFn)
+        {
+            var args = argsFn(packagePath, false);
+            if (String.IsNullOrEmpty(args)) {
+                Log.Debug("{0} was not signed.", packagePath);
+                return;
+            }
+
+            Log.Info("About to sign '{0}'", packagePath);
+
+            var psi = Utility.CreateProcessStartInfo(NugetPath, $"sign {args}");
+            var processResult = await Utility.InvokeProcessUnsafeAsync(psi, CancellationToken.None);
+
+            if (processResult.ExitCode != 0) {
+                var argsSafe = argsFn(packagePath, true);
+                throw new Exception($"Signing return error code {processResult.ExitCode}. Command invoked was '{NugetPath} sign {argsSafe}'. Output was: {processResult.StdOutput}");
+            } else {
+                Log.Info("Sign successful - " + processResult.StdOutput);
             }
         }
 
