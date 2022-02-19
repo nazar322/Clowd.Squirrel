@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Squirrel.Internal
+namespace Squirrel.Shared
 {
     /// <summary>
     /// A wrapper class that creates a logical substream from a region within an existing seekable stream.
@@ -14,7 +14,7 @@ namespace Squirrel.Internal
     /// Ensures thread-safe operations between related substream instances via a shared, user-supplied synchronization mutex.
     /// This class will buffer read requests to minimize overhead on the underlying stream.
     /// </summary>
-    internal sealed class SubStream : Stream
+    public sealed class SubStream : Stream
     {
         // Stream to be logically wrapped.
         private Stream wrappedStream;

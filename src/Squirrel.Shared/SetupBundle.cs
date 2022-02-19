@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.NET.HostModel;
 using Microsoft.NET.HostModel.AppHost;
-using Squirrel.Internal;
 
-namespace SquirrelCli
+namespace Squirrel.Shared
 {
-    internal class SetupBundle
+    public static class SetupBundle
     {
         public static bool IsBundle(string setupPath, out long bundleOffset, out long bundleLength)
         {
