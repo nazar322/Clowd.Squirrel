@@ -1,6 +1,7 @@
 ﻿// Parts of this file have been used from
 // https://github.com/icsharpcode/ILSpy/blob/f7460a041ea8fb8b0abf8527b97a5b890eb94eea/ICSharpCode.Decompiler/SingleFileBundle.cs
 
+using Microsoft.NET.HostModel;
 using Microsoft.NET.HostModel.AppHost;
 using Microsoft.NET.HostModel.Bundle;
 using Squirrel;
