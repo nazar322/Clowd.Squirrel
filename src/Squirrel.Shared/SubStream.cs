@@ -277,7 +277,6 @@ namespace Squirrel.Shared
         /// <param name="offset">A byte offset relative to the origin parameter.</param>
         /// <param name="origin">A value of type System.IO.SeekOrigin indicating the reference point used to obtain the new position.</param>
         /// <returns>The new position within the current substream.</returns>
-        /// <exception cref="NotSupportedException">Thrown if using the unsupported <paramref name="origin"/> SeekOrigin.End </exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="offset"/> is invalid for SeekOrigin.</exception>
         public override long Seek(long offset, SeekOrigin origin)
         {
@@ -295,7 +294,8 @@ namespace Squirrel.Shared
                 break;
 
             case SeekOrigin.End:
-                throw new NotSupportedException();
+                startIndex = this.substreamLength;
+                break;
 
             default:
                 throw new ArgumentOutOfRangeException();

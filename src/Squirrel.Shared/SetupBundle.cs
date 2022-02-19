@@ -23,20 +23,20 @@ namespace Squirrel.Shared
             long length = 0;
             void FindBundleHeader()
             {
-                using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(setupPath)) {
-                    using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor()) {
-                        int position = BinaryUtils.SearchInFile(accessor, bundleSignature);
-                        if (position == -1) {
-                            throw new PlaceHolderNotFoundInAppHostException(bundleSignature);
-                        }
-
-                        offset = accessor.ReadInt64(position - 16);
-                        length = accessor.ReadInt64(position - 8);
+                using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(setupPath, FileMode.Open, null, 0, MemoryMappedFileAccess.Read))
+                using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read)) {
+                    int position = BinaryUtils.SearchInFile(accessor, bundleSignature);
+                    if (position == -1) {
+                        throw new PlaceHolderNotFoundInAppHostException(bundleSignature);
                     }
+
+                    offset = accessor.ReadInt64(position - 16);
+                    length = accessor.ReadInt64(position - 8);
                 }
             }
 
-            RetryUtil.RetryOnIOError(FindBundleHeader);
+            Utility.Retry(FindBundleHeader);
+
             bundleOffset = offset;
             bundleLength = length;
 
@@ -47,7 +47,7 @@ namespace Squirrel.Shared
         {
             long bundleOffset, bundleLength;
             using (var pkgStream = File.OpenRead(packagePath))
-            using (var setupStream = File.Open(setupPath, FileMode.Append, FileAccess.ReadWrite)) {
+            using (var setupStream = File.Open(setupPath, FileMode.Append, FileAccess.Write)) {
                 bundleOffset = setupStream.Position;
                 bundleLength = pkgStream.Length;
                 pkgStream.CopyTo(setupStream);
@@ -85,6 +85,7 @@ namespace Squirrel.Shared
         {
             if (!IsBundle(setupPath, out var offset, out var length))
                 throw new InvalidOperationException("The provided executable has no embedded Squirrel package.");
+
             return new SubStream(File.OpenRead(setupPath), offset, length, new SemaphoreSlim(1), false);
         }
     }

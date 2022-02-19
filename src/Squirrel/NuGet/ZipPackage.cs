@@ -52,6 +52,10 @@ namespace Squirrel.NuGet
         public IEnumerable<ZipPackageFile> Files { get; private set; } = Enumerable.Empty<ZipPackageFile>();
         public RuntimeCpu MachineArchitecture { get; private set; }
 
+        public byte[] SetupSplashBytes { get; private set; }
+        public byte[] SetupIconBytes { get; private set; }
+        public byte[] AppIconBytes { get; private set; }
+
         protected string Description { get; private set; }
         protected IEnumerable<string> Authors { get; private set; } = Enumerable.Empty<string>();
         protected string Owners { get; private set; }
@@ -71,6 +75,27 @@ namespace Squirrel.NuGet
             ReadManifest(manifest);
             Files = GetPackageFiles(zip).ToArray();
             Frameworks = GetFrameworks(Files);
+
+            // we pre-load some images so the zip doesn't need to be opened again later
+            SetupSplashBytes = ReadFileToBytes(zip, z => Path.GetFileNameWithoutExtension(z.Key) == "splashimage");
+            SetupIconBytes = ReadFileToBytes(zip, z => z.Key == "setup.ico");
+            AppIconBytes = ReadFileToBytes(zip, z => z.Key == "app.ico") ?? ReadFileToBytes(zip, z => z.Key.EndsWith("app.ico"));
+        }
+
+        private byte[] ReadFileToBytes(ZipArchive archive, Func<ZipArchiveEntry, bool> predicate)
+        {
+            var f = archive.Entries.FirstOrDefault(predicate);
+            if (f == null)
+                return null;
+
+            using var stream = f.OpenEntryStream();
+            if (stream == null)
+                return null;
+
+            var ms = new MemoryStream();
+            stream.CopyTo(ms);
+
+            return ms.ToArray();
         }
 
         public static void SetSquirrelMetadata(string nuspecPath, RuntimeCpu architecture, IEnumerable<string> runtimes)

@@ -53,15 +53,17 @@ namespace Squirrel.Update.Windows
         private const int PropertyTagPixelPerUnitX = 0x5111;
         private const int PropertyTagPixelPerUnitY = 0x5112;
 
-        public User32SplashWindow(string appName, bool silent, Stream iconStream, Stream splashStream)
+        public User32SplashWindow(string appName, bool silent, byte[] iconBytes, byte[] splashBytes)
         {
             _appName = appName;
             _silent = silent;
             _signal = new ManualResetEvent(false);
 
             try {
-                if (iconStream?.Length > 0) _icon = new Icon(iconStream);
-                if (splashStream?.Length > 0) _img = (Bitmap) Bitmap.FromStream(splashStream);
+                // we only accept a byte array and convert to memorystream because
+                // gdi needs to seek and get length which is not supported in DeflateStream
+                if (iconBytes?.Length > 0) _icon = new Icon(new MemoryStream(iconBytes));
+                if (splashBytes?.Length > 0) _img = (Bitmap) Bitmap.FromStream(new MemoryStream(splashBytes));
             } catch (Exception ex) {
                 Log.WarnException("Unable to load splash image", ex);
             }
