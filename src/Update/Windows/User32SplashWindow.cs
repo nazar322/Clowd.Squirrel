@@ -53,15 +53,15 @@ namespace Squirrel.Update.Windows
         private const int PropertyTagPixelPerUnitX = 0x5111;
         private const int PropertyTagPixelPerUnitY = 0x5112;
 
-        public User32SplashWindow(string appName, bool silent, byte[] iconBytes, byte[] splashBytes)
+        public User32SplashWindow(string appName, bool silent, Stream iconStream, Stream splashStream)
         {
             _appName = appName;
             _silent = silent;
             _signal = new ManualResetEvent(false);
 
             try {
-                if (iconBytes?.Length > 0) _icon = new Icon(new MemoryStream(iconBytes));
-                if (splashBytes?.Length > 0) _img = (Bitmap) Bitmap.FromStream(new MemoryStream(splashBytes));
+                if (iconStream?.Length > 0) _icon = new Icon(iconStream);
+                if (splashStream?.Length > 0) _img = (Bitmap) Bitmap.FromStream(splashStream);
             } catch (Exception ex) {
                 Log.WarnException("Unable to load splash image", ex);
             }

@@ -36,6 +36,7 @@ namespace Squirrel.NuGet
         public string ProductDescription => Description ?? Summary ?? Title ?? Id;
         public string ProductCompany => (Authors.Any() ? String.Join(", ", Authors) : Owners) ?? ProductName;
         public string ProductCopyright => Copyright ?? "Copyright © " + DateTime.Now.Year.ToString() + " " + ProductCompany;
+        public string FullReleaseFilename => String.Format("{0}-{1}-full.nupkg", Id, Version);
 
         public string Id { get; private set; }
         public SemanticVersion Version { get; private set; }
