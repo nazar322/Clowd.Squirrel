@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using NuGet.Versioning;
+using Squirrel.Lib;
 
 namespace Squirrel
 {
@@ -875,6 +876,84 @@ namespace Squirrel
                 return ret;
             } finally {
                 gch.Free();
+            }
+        }
+
+#if NET5_0_OR_GREATER
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
+        public static void KillProcessesInDirectory(string directoryToKill)
+        {
+            var ourExePath = SquirrelRuntimeInfo.EntryExePath;
+            Utility.EnumerateProcesses()
+                .Where(x => {
+                    // Processes we can't query will have an empty process name,
+                    // we can't kill them anyways
+                    if (String.IsNullOrWhiteSpace(x.ProcessExePath)) return false;
+
+                    // Files that aren't in our root app directory are untouched
+                    if (!Utility.IsFileInDirectory(x.ProcessExePath, directoryToKill)) return false;
+
+                    // Never kill our own EXE
+                    if (ourExePath != null && x.ProcessExePath.Equals(ourExePath, StringComparison.OrdinalIgnoreCase)) return false;
+
+                    var name = Path.GetFileName(x.ProcessExePath).ToLowerInvariant();
+                    if (name == "squirrel.exe" || name == "update.exe") return false;
+
+                    return true;
+                })
+                .ForEach(x => {
+                    try {
+                        Process.GetProcessById(x.ProcessId).Kill();
+                    } catch (Exception ex) {
+                        Log().WarnException($"Unable to terminate process (pid.{x.ProcessId})", ex);
+                    }
+                });
+        }
+
+#if NET5_0_OR_GREATER
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
+        public static string UpdateAndGetLatestJunction(string rootAppDir, string latestAppExeDir, bool force)
+        {
+            try {
+                var latestDir = Path.Combine(rootAppDir, "current");
+
+                // The junction exists, and is correct
+                if (JunctionPoint.Exists(latestDir) && JunctionPoint.GetTarget(latestDir) == latestAppExeDir) {
+                    Log().Info("Junction 'current' already up to date, pointing to '{0}'", latestAppExeDir);
+                    return latestDir;
+                }
+
+                // The junction does not exist, let's create it
+                if (!Directory.Exists(latestDir)) {
+                    Log().Info("Junction 'current' does not exist, creating to '{0}'", latestAppExeDir);
+                    JunctionPoint.Create(latestDir, latestAppExeDir, true);
+                    return latestDir;
+                }
+
+                // The junction exists, but it's wrong. If we are trying to "force" this to happen,
+                // we need to kill any exe's running in this junction
+                Log().Info($"Junction 'current' needs to be updated.");
+                if (force) {
+                    Log().Info($"Killing running processes in '{rootAppDir}'.");
+                    Utility.KillProcessesInDirectory(rootAppDir);
+                }
+
+                // This is a full folder and not a junction. Not sure how this would happen
+                if (!JunctionPoint.Exists(latestDir)) {
+                    Log().Warn($"Deleting regular folder at '{latestDir}'. It must be a junction.");
+                    Utility.DeleteFileOrDirectoryHard(latestDir);
+                }
+
+                JunctionPoint.Create(latestDir, latestAppExeDir, true);
+                Log().Info("Junction 'current' was updated to '{0}'", latestAppExeDir);
+
+                return latestDir;
+            } catch (Exception ex) {
+                // in case of error, we return the 'app-v123' dir instead.
+                Log().ErrorException("Unable to update 'current' junction.", ex);
+                return latestAppExeDir;
             }
         }
     }

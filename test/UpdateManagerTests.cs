@@ -13,6 +13,7 @@ using System.Net;
 using Squirrel.NuGet;
 using System.Net.Http;
 using NuGet.Versioning;
+using Squirrel.Lib;
 
 namespace Squirrel.Tests
 {
@@ -322,12 +323,14 @@ namespace Squirrel.Tests
                     Directory.CreateDirectory(Path.Combine(tempDir, "theApp"));
                     Directory.CreateDirectory(Path.Combine(tempDir, "theApp", "app-1.0.1"));
                     Directory.CreateDirectory(Path.Combine(tempDir, "theApp", "wrongDir"));
+                    JunctionPoint.Create(Path.Combine(tempDir, "theApp", "current"), Path.Combine(tempDir, "theApp", "app-1.0.1"), true);
                     File.WriteAllText(Path.Combine(tempDir, "theApp", "Update.exe"), "1");
                     using (var fixture = new UpdateManager("http://lol", "theApp", tempDir)) {
                         Assert.Null(fixture.CurrentlyInstalledVersion(Path.Combine(tempDir, "app.exe")));
                         Assert.Null(fixture.CurrentlyInstalledVersion(Path.Combine(tempDir, "theApp", "app.exe")));
                         Assert.Null(fixture.CurrentlyInstalledVersion(Path.Combine(tempDir, "theApp", "wrongDir", "app.exe")));
                         Assert.Equal(new SemanticVersion(1, 0, 9), fixture.CurrentlyInstalledVersion(Path.Combine(tempDir, "theApp", "app-1.0.9", "app.exe")));
+                        Assert.Equal(new SemanticVersion(1, 0, 1), fixture.CurrentlyInstalledVersion(Path.Combine(tempDir, "theApp", "current", "app.exe")));
                     }
                 }
             }

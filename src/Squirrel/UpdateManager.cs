@@ -12,6 +12,7 @@ using Squirrel.SimpleSplat;
 using Squirrel.Shell;
 using Squirrel.Sources;
 using NuGet.Versioning;
+using Squirrel.Lib;
 
 namespace Squirrel
 {
@@ -204,15 +205,18 @@ namespace Squirrel
             if (!File.Exists(Path.Combine(baseDir, "..\\Update.exe")))
                 return null;
 
-            var exePathWithoutAppDir = executable.Substring(appDir.Length);
-            var appDirName = exePathWithoutAppDir.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                .FirstOrDefault(x => x.StartsWith("app-", StringComparison.OrdinalIgnoreCase));
+            // resolve 'current' junction to 'app-{ver}'
+            if (Path.GetFileName(baseDir).Equals("current") && JunctionPoint.Exists(baseDir))
+                baseDir = JunctionPoint.GetTarget(baseDir);
 
-            // check if we are inside an 'app-{ver}' directory and extract version
-            if (appDirName == null)
+            var appDirName = Path.GetFileName(baseDir);
+            if (!appDirName.StartsWith("app-", StringComparison.InvariantCultureIgnoreCase))
                 return null;
 
-            return NuGetVersion.Parse(appDirName.Substring(4));
+            if (NuGetVersion.TryParse(appDirName.Substring(4), out var ver))
+                return ver;
+
+            return null;
         }
 
         /// <inheritdoc/>
@@ -290,7 +294,7 @@ namespace Squirrel
             var argsArg = arguments != null ?
                 String.Format("-a \"{0}\"", arguments) : "";
 
-            Process.Start(getUpdateExe(), String.Format("--processStartAndWait \"{0}\" {1}", exeToStart, argsArg));
+            Process.Start(getUpdateExe(), String.Format("--forceLatest --processStartAndWait \"{0}\" {1}", exeToStart, argsArg));
 
             // NB: We have to give update.exe some time to grab our PID, but
             // we can't use WaitForInputIdle because we probably don't have
@@ -324,7 +328,7 @@ namespace Squirrel
             var argsArg = arguments != null ?
                 String.Format("-a \"{0}\"", arguments) : "";
 
-            var updateProcess = Process.Start(getUpdateExe(), String.Format("--processStartAndWait {0} {1}", exeToStart, argsArg));
+            var updateProcess = Process.Start(getUpdateExe(), String.Format("--forceLatest --processStartAndWait \"{0}\" {1}", exeToStart, argsArg));
 
             await Task.Delay(500).ConfigureAwait(false);
 

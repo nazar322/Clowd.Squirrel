@@ -124,7 +124,7 @@ namespace Squirrel.Update
                 Deshortcut(opt.target, opt.shortcutArgs);
                 break;
             case UpdateAction.ProcessStart:
-                ProcessStart(opt.processStart, opt.processStartArgs, opt.shouldWait);
+                ProcessStart(opt.processStart, opt.processStartArgs, opt.shouldWait, opt.forceLatest);
                 break;
             }
 
@@ -463,7 +463,7 @@ namespace Squirrel.Update
             }
         }
 
-        static void ProcessStart(string exeName, string arguments, bool shouldWait)
+        static void ProcessStart(string exeName, string arguments, bool shouldWait, bool forceLatest)
         {
             if (String.IsNullOrWhiteSpace(exeName)) {
                 ShowHelp();
@@ -481,13 +481,26 @@ namespace Squirrel.Update
             // tags. However, the RELEASES file _will_ have them, so we need to look
             // for directories that match both the real version, and the sanitized
             // version, giving priority to the former.
-            var latestAppDir = releases
+            var latestAppExeDir = releases
                 .OrderByDescending(x => x.Version)
                 .SelectMany(x => new[] {
                     Utility.AppDirForRelease(appDir, x),
                     Utility.AppDirForVersion(appDir, new SemanticVersion(x.Version.Major, x.Version.Minor, x.Version.Patch, ""))
                 })
                 .FirstOrDefault(x => Directory.Exists(x));
+
+            // CS: We maintain a junction in the app folder named "current" that points to the latest version.
+            // Only running exe's from within this "current" folder means trayicon pins and taskbar pin settings
+            // will not require any special handling. Additionally, doing it on ProcessStart (instead of during update)
+            // allows us to support the following:
+            //   1. App V1 is running
+            //   2. App V2 is downloaded / installed 
+            //   3. Someone clicks an application shortcut while V1 is still running, and updating the junction will fail
+            //   4. Because the junction updated failed, we will execute V1 exe's again (so we don't have two different versions running at the same time)
+            //   5. Next time the application is fully exited and run again, the junction can be updated and V2 will be executed
+            // the forceLatest switch can override this behavior, which will result in us killing V1 and updating the junction anyway.
+
+            string latestAppDir = Utility.UpdateAndGetLatestJunction(appDir, latestAppExeDir, forceLatest);
 
             // Check for the EXE name they want
             var targetExe = new FileInfo(Path.Combine(latestAppDir, exeName.Replace("%20", " ")));
