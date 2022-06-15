@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
-using Squirrel.SimpleSplat;
 using Squirrel.Sources;
 
 namespace Squirrel

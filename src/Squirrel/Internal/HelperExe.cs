@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Squirrel.Lib;
 using Squirrel.SimpleSplat;
 
 namespace Squirrel

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using Squirrel;
 using Squirrel.NuGet;
 using Squirrel.Tests.TestHelpers;
 using Xunit;

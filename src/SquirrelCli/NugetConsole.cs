@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NuGet.Commands;
-using NuGet.Configuration;
-using NuGet.Packaging;
-using NuGet.Versioning;
 using Squirrel.SimpleSplat;
 
 namespace SquirrelCli

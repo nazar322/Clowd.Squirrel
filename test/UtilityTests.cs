@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Squirrel.SimpleSplat;
-using Squirrel;
 using Squirrel.Tests.TestHelpers;
 using Xunit;
 using Squirrel.Shell;

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using SharpCompress.Archives.Zip;
 
 namespace Squirrel.NuGet
 {

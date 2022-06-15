@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Squirrel.NuGet;
-using Squirrel;
 using Squirrel.SimpleSplat;
 using Squirrel.Tests.TestHelpers;
 using Xunit;

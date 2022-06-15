@@ -6,11 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
-using Squirrel;
 using Squirrel.Tests.TestHelpers;
 using Xunit;
-using System.Net;
-using Squirrel.NuGet;
 using System.Net.Http;
 
 namespace Squirrel.Tests

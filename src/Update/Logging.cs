@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using NLog.Config;
 using NLog.Targets;
 using Squirrel.SimpleSplat;

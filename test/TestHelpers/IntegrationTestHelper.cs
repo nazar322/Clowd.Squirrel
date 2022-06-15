@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Squirrel;
-using Squirrel.SimpleSplat;
 using Xunit;
 using System.Text;
 using SharpCompress.Archives.Zip;

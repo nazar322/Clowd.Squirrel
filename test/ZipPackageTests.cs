@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Squirrel.NuGet;
 using Squirrel.Tests.TestHelpers;
 using Xunit;

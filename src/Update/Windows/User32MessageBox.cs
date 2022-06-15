@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 // from clowd-windows/Clowd.PlatformUtil/Windows/User32MessageBox.cs
 

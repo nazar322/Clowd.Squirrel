@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Squirrel.SimpleSplat;
-using Squirrel.Tests.TestHelpers;
+﻿using System.Threading.Tasks;
 using Xunit;
 
 namespace Squirrel.Tests

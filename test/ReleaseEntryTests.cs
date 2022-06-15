@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Squirrel;
 using Squirrel.Tests.TestHelpers;
 using Xunit;
-using Squirrel.NuGet;
 
 namespace Squirrel.Tests
 {
