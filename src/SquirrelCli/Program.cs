@@ -284,7 +284,20 @@ namespace SquirrelCli
                     peparsed.ForEach(kvp => DotnetUtil.CheckDotnetReferences(kvp.Key, kvp.Value, requiredFrameworks));
 
                     // store the runtime dependencies and the package architecture in nuspec (read by installer)
-                    ZipPackage.SetSquirrelMetadata(nuspecPath, pkgarch, requiredFrameworks.Select(r => r.Id));
+                    Dictionary<string, string> toSet = new();
+
+                    if (pkgarch != RuntimeCpu.Unknown)
+                        toSet.Add("machineArchitecture", pkgarch.ToString());
+
+                    var runtimes = requiredFrameworks.Select(r => r.Id).ToList();
+                    if (runtimes.Any())
+                        toSet.Add("runtimeDependencies", String.Join(",", runtimes));
+
+                    toSet.Add("eulaUrl", options.eulaUrl);
+                    toSet.Add("tosUrl", options.tosUrl);
+                    toSet.Add("privacyPolicyUrl", options.privacyPolicyUrl);
+
+                    ZipPackage.SetSquirrelMetadata(nuspecPath, toSet);
 
                     // create stub executable for all exe's in this package (except Squirrel!)
                     var exesToCreateStubFor = new DirectoryInfo(pkgPath).GetAllFilesRecursively()

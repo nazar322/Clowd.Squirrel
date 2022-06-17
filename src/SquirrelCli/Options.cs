@@ -95,6 +95,9 @@ namespace SquirrelCli
         public bool allowUnaware { get; private set; }
         public string msi { get; private set; }
         public string debugSetupExe { get; private set; }
+        public string eulaUrl { get; private set; }
+        public string tosUrl { get; private set; }
+        public string privacyPolicyUrl { get; private set; }
 
         public ReleasifyOptions()
         {
@@ -114,6 +117,9 @@ namespace SquirrelCli
             Add("i=|icon=", "{PATH} to .ico for Setup.exe and Update.exe", v => icon = v);
             Add("appIcon=", "{PATH} to .ico for 'Apps and Features' list", v => appIcon = v);
             Add("msi=", "Compile a .msi machine-wide deployment tool with the specified {BITNESS}. (either 'x86' or 'x64')", v => msi = v.ToLower());
+            Add("eulaUrl=", "Url to End User License Agreement that will be used by the consent window", v => eulaUrl = v);
+            Add("tosUrl=", "Url to Terms of Service that will be used by the consent window", v => tosUrl = v);
+            Add("privacyPolicyUrl=", "Url to Privacy Policy that will be used by the consent window", v => privacyPolicyUrl = v);
         }
 
         public override void Validate()
@@ -127,6 +133,9 @@ namespace SquirrelCli
             IsValidFile(nameof(icon), ".ico");
             IsValidFile(nameof(splashImage));
             IsValidUrl(nameof(baseUrl));
+            IsValidUrl(nameof(eulaUrl));
+            IsValidUrl(nameof(tosUrl));
+            IsValidUrl(nameof(privacyPolicyUrl));
 
             if (checkPackage) {
                 IsRequired(nameof(package));

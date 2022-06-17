@@ -55,6 +55,10 @@ namespace Squirrel.NuGet
         public byte[] SetupIconBytes { get; private set; }
         public byte[] AppIconBytes { get; private set; }
 
+        public Uri EulaUrl { get; private set; }
+        public Uri TosUrl { get; private set; }
+        public Uri PrivacyPolicyUrl { get; private set; }
+
         protected string Description { get; private set; }
         protected IEnumerable<string> Authors { get; private set; } = Enumerable.Empty<string>();
         protected string Owners { get; private set; }
@@ -97,14 +101,8 @@ namespace Squirrel.NuGet
             return ms.ToArray();
         }
 
-        public static void SetSquirrelMetadata(string nuspecPath, RuntimeCpu architecture, IEnumerable<string> runtimes)
+        public static void SetSquirrelMetadata(string nuspecPath, Dictionary<string, string> toSet)
         {
-            Dictionary<string, string> toSet = new();
-            if (architecture != RuntimeCpu.Unknown)
-                toSet.Add("machineArchitecture", architecture.ToString());
-            if (runtimes.Any())
-                toSet.Add("runtimeDependencies", String.Join(",", runtimes));
-
             if (!toSet.Any())
                 return;
 
@@ -251,6 +249,15 @@ namespace Squirrel.NuGet
                 break;
             case "runtimeDependencies":
                 RuntimeDependencies = getCommaDelimitedValue(value);
+                break;
+            case "eulaUrl":
+                EulaUrl = new Uri(value);
+                break;
+            case "tosUrl":
+                TosUrl = new Uri(value);
+                break;
+            case "privacyPolicyUrl":
+                PrivacyPolicyUrl = new Uri(value);
                 break;
             }
         }

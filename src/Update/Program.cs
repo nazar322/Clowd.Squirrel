@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Squirrel.NuGet;
 using Squirrel.Lib;
+using Squirrel.Update.Windows;
 using static Squirrel.Runtimes.RuntimeInstallResult;
 
 namespace Squirrel.Update
@@ -133,6 +134,16 @@ namespace Squirrel.Update
             using var fs = File.OpenRead(setupPath);
             var zp = new ZipPackage(fs, true);
             var appname = zp.ProductName;
+
+            if (!silentInstall)
+            {
+                var install = User32MessageBox.Show(IntPtr.Zero, $"{zp.EulaUrl}\n{zp.TosUrl}\n{zp.PrivacyPolicyUrl}",
+                    $"Setup", User32MessageBox.MessageBoxButtons.YesNo);
+                if (install == User32MessageBox.MessageBoxResult.No)
+                {
+                    Environment.Exit(0);
+                }
+            }
 
             if (checkInstall) {
                 // CS: migrated from MachineInstaller.cpp
