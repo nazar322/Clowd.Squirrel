@@ -58,6 +58,7 @@ namespace Squirrel.NuGet
         public string EulaUrl { get; private set; }
         public string TosUrl { get; private set; }
         public string PrivacyPolicyUrl { get; private set; }
+        public byte[] ConsentWindowLogoBytes { get; private set; }
 
         protected string Description { get; private set; }
         protected IEnumerable<string> Authors { get; private set; } = Enumerable.Empty<string>();
@@ -83,6 +84,7 @@ namespace Squirrel.NuGet
             SetupSplashBytes = ReadFileToBytes(zip, z => Path.GetFileNameWithoutExtension(z.Key) == "splashimage");
             SetupIconBytes = ReadFileToBytes(zip, z => z.Key == "setup.ico");
             AppIconBytes = ReadFileToBytes(zip, z => z.Key == "app.ico") ?? ReadFileToBytes(zip, z => z.Key.EndsWith("app.ico"));
+            ConsentWindowLogoBytes = ReadFileToBytes(zip, z => Path.GetFileNameWithoutExtension(z.Key) == "consentLogo");
         }
 
         private byte[] ReadFileToBytes(ZipArchive archive, Func<ZipArchiveEntry, bool> predicate)

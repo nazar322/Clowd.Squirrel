@@ -98,6 +98,7 @@ namespace SquirrelCli
         public string eulaUrl { get; private set; }
         public string tosUrl { get; private set; }
         public string privacyPolicyUrl { get; private set; }
+        public string consentWindowLogo { get; private set; }
 
         public ReleasifyOptions()
         {
@@ -120,6 +121,7 @@ namespace SquirrelCli
             Add("eulaUrl=", "Url to End User License Agreement that will be used by the consent window", v => eulaUrl = v);
             Add("tosUrl=", "Url to Terms of Service that will be used by the consent window", v => tosUrl = v);
             Add("privacyPolicyUrl=", "Url to Privacy Policy that will be used by the consent window", v => privacyPolicyUrl = v);
+            Add("consentWindowLogo=", "{PATH} to the logo displayed in the install consent window", v => consentWindowLogo = v);
         }
 
         public override void Validate()
@@ -136,6 +138,7 @@ namespace SquirrelCli
             IsValidUrl(nameof(eulaUrl));
             IsValidUrl(nameof(tosUrl));
             IsValidUrl(nameof(privacyPolicyUrl));
+            IsValidFile(nameof(consentWindowLogo));
 
             if (checkPackage) {
                 IsRequired(nameof(package));

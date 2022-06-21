@@ -29,9 +29,11 @@ namespace Squirrel.Update.Windows
         private const int PropertyTagPixelPerUnitX = 0x5111;
         private const int PropertyTagPixelPerUnitY = 0x5112;
         private const int leftPadding = 30;
+        private const int WindowWidth = 485;
+        private const int WindowHeight = 475;
         private const string WINDOW_CLASS_NAME = "SquirrelInstallConsentWindow";
 
-        //private readonly Bitmap _img;
+        private readonly Bitmap _img;
         private readonly Icon _icon;
         private readonly ManualResetEvent _signal = new ManualResetEvent(initialState: false);
         private readonly Thread _thread;
@@ -52,7 +54,6 @@ namespace Squirrel.Update.Windows
         private SafeHWND _eulaLinkHwnd;
         private SafeHWND _privacyPolicyLinkHwnd;
         private SafeHWND _termsAndConditionsLinkHwnd;
-        private SafeHWND _bannerTextHwnd;
 
         public bool Result { get; private set; }
 
@@ -65,11 +66,15 @@ namespace Squirrel.Update.Windows
             _tosUrl = tosUrl;
             _privacyPolicyUrl = privacyPolicyUrl;
 
-            //using (var stream = new MemoryStream(logoBytes)) {
-            //    _img = new Bitmap(stream);
-            //}
+            if (logoBytes is { Length: > 0 })
+            {
+                using var stream = new MemoryStream(logoBytes);
+                _img = new Bitmap(stream);
+            }
 
-            using (var stream = new MemoryStream(iconBytes)) {
+            if (iconBytes is { Length: > 0 })
+            {
+                using var stream = new MemoryStream(iconBytes);
                 _icon = new Icon(stream);
             }
 
@@ -148,11 +153,11 @@ namespace Squirrel.Update.Windows
                 //Because call to GetDpiForMonitor requires SHCore.dll which is not available
                 //in Windows 7, we hard-wire the dpi values to 96 to suit most users
                 double dpiX = 96;
-                double dpiY = 96;
+                //double dpiY = 96;
 
                 // calculate scaling factor for image. If the image does not have embedded dpi information, we default to 96
-                double dpiRatioX = dpiX / 96d;
-                double dpiRatioY = dpiY / 96d;
+                //double dpiRatioX = dpiX / 96d;
+                //double dpiRatioY = dpiY / 96d;
                 //var embeddedDpi = _img.PropertyIdList.Any(p => p == PropertyTagPixelPerUnitX || p == PropertyTagPixelPerUnitY);
                 //if (embeddedDpi) {
                 //    dpiRatioX = dpiX / _img.HorizontalResolution;
@@ -165,8 +170,8 @@ namespace Squirrel.Update.Windows
                 //w = (int)Math.Round(_img.Width * dpiRatioX);
                 //h = (int)Math.Round(_img.Height * dpiRatioY);
 
-                w = 485;
-                h = 475;
+                w = WindowWidth;
+                h = WindowHeight;
                 x = (mi.rcWork.Width - w) / 2;
                 y = (mi.rcWork.Height - h) / 2;
 
@@ -224,15 +229,6 @@ namespace Squirrel.Update.Windows
 
             var textStyle = (WindowStyles) ((int) WS_CHILD | (int) WS_VISIBLE | (int) (StaticStyle.SS_NOTIFY));
 
-            _bannerTextHwnd = CreateWindow("STATIC",
-                                    "Best Video Downloader",
-                                    WS_CHILD | WS_VISIBLE,
-                                    leftPadding, 90, 460, 40,
-                                    _hwnd,
-                                    HMENU.NULL,
-                                    instance,
-                                    IntPtr.Zero);
-
             var legalInfoText = CreateWindow("STATIC",
                             "By clicking on \"Install\" you are agreeing to our:",
                             WS_CHILD | WS_VISIBLE,
@@ -284,9 +280,6 @@ namespace Squirrel.Update.Windows
 
             SendMessage(_cancelButtonHwnd, (uint) WM_SETFONT, (IntPtr) guiFont, true);
             SendMessage(_installButtonHwnd, (uint) WM_SETFONT, (IntPtr) guiFont, true);
-            SendMessage(_bannerTextHwnd,
-                       (uint) WM_SETFONT,
-                       CreateFont(cHeight: 42, cWeight: FW_SEMIBOLD, pszFaceName: "Segoe UI").DangerousGetHandle());
 
             SendMessage(legalInfoText,
                        (uint) WM_SETFONT,
@@ -309,8 +302,6 @@ namespace Squirrel.Update.Windows
                    lParam == _privacyPolicyLinkHwnd.DangerousGetHandle() ||
                    lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle()) {
                     SetTextColor(hdc, new COLORREF(0, 0, 255));
-                } else if (lParam == _bannerTextHwnd.DangerousGetHandle()) {
-                    SetTextColor(hdc, new COLORREF(190, 190, 190));
                 }
 
                 SetBkColor(hdc, new COLORREF(255, 255, 255));
@@ -319,18 +310,18 @@ namespace Squirrel.Update.Windows
 
             case (uint) WM_PAINT:
                 GetWindowRect(hwnd, out var r);
-                //int w = _img.Width;
-                //int h = _img.Height;
+                int w = _img.Width;
+                int h = _img.Height;
 
-                //using (var buffer = new Bitmap(w, h))
-                //using (var g = Graphics.FromImage(buffer))
-                //using (var wnd = Graphics.FromHwnd(hwnd.DangerousGetHandle())) {
-                //    //draw image to back buffer
-                //    lock (_img) g.DrawImage(_img, 0, 0, w, h);
+                using (var buffer = new Bitmap(w, h))
+                using (var g = Graphics.FromImage(buffer))
+                using (var wnd = Graphics.FromHwnd(hwnd.DangerousGetHandle())) {
+                    //draw image to back buffer
+                    lock (_img) g.DrawImage(_img, 0, 0, w, h);
 
                     //only should do a single draw operation to the window front buffer to prevent flickering
-                    //wnd.DrawImage(buffer, leftPadding, 30, w, h);
-                //}
+                    wnd.DrawImage(buffer, leftPadding, 30, w, h);
+                }
 
                 ValidateRect(hwnd, null);
                 return 0;

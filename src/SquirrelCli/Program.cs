@@ -155,6 +155,7 @@ namespace SquirrelCli
             var generateDeltas = !options.noDelta;
             var backgroundGif = options.splashImage;
             var setupIcon = options.icon ?? options.appIcon;
+            var consentLogo = options.consentWindowLogo;
 
             if (!package.EndsWith(".nupkg", StringComparison.InvariantCultureIgnoreCase))
                 throw new ArgumentException("package must be packed with nuget and end in '.nupkg'");
@@ -346,6 +347,7 @@ namespace SquirrelCli
                     // copy other images to root (used by setup)
                     if (setupIcon != null) File.Copy(setupIcon, Path.Combine(pkgPath, "setup.ico"), true);
                     if (backgroundGif != null) File.Copy(backgroundGif, Path.Combine(pkgPath, "splashimage" + Path.GetExtension(backgroundGif)));
+                    if (consentLogo != null) File.Copy(consentLogo, Path.Combine(pkgPath, "consentLogo" + Path.GetExtension(consentLogo)));
                 });
 
                 processed.Add(rp.ReleasePackageFile);
