@@ -55,9 +55,9 @@ namespace Squirrel.NuGet
         public byte[] SetupIconBytes { get; private set; }
         public byte[] AppIconBytes { get; private set; }
 
-        public Uri EulaUrl { get; private set; }
-        public Uri TosUrl { get; private set; }
-        public Uri PrivacyPolicyUrl { get; private set; }
+        public string EulaUrl { get; private set; }
+        public string TosUrl { get; private set; }
+        public string PrivacyPolicyUrl { get; private set; }
 
         protected string Description { get; private set; }
         protected IEnumerable<string> Authors { get; private set; } = Enumerable.Empty<string>();
@@ -251,13 +251,13 @@ namespace Squirrel.NuGet
                 RuntimeDependencies = getCommaDelimitedValue(value);
                 break;
             case "eulaUrl":
-                EulaUrl = new Uri(value);
+                EulaUrl = value;
                 break;
             case "tosUrl":
-                TosUrl = new Uri(value);
+                TosUrl = value;
                 break;
             case "privacyPolicyUrl":
-                PrivacyPolicyUrl = new Uri(value);
+                PrivacyPolicyUrl = value;
                 break;
             }
         }

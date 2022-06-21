@@ -137,11 +137,16 @@ namespace Squirrel.Update
 
             if (!silentInstall)
             {
-                var install = User32MessageBox.Show(IntPtr.Zero, $"{zp.EulaUrl}\n{zp.TosUrl}\n{zp.PrivacyPolicyUrl}",
-                    $"Setup", User32MessageBox.MessageBoxButtons.YesNo);
-                if (install == User32MessageBox.MessageBoxResult.No)
-                {
-                    Environment.Exit(0);
+                //var install = User32MessageBox.Show(IntPtr.Zero, $"{zp.EulaUrl}\n{zp.TosUrl}\n{zp.PrivacyPolicyUrl}",
+                //    $"Setup", User32MessageBox.MessageBoxButtons.YesNo);
+                //if (install == User32MessageBox.MessageBoxResult.No)
+                //{
+                //    Environment.Exit(0);
+                //}
+                var consentWindow = new InstallConsentWindow(appname, zp.SetupIconBytes, null, zp.EulaUrl, zp.TosUrl, zp.PrivacyPolicyUrl);
+                consentWindow.Show();
+                if (!consentWindow.Result) {
+                    return;
                 }
             }
 
