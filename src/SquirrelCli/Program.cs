@@ -295,7 +295,7 @@ namespace SquirrelCli
                         toSet.Add("runtimeDependencies", String.Join(",", runtimes));
 
                     toSet.Add("eulaUrl", options.eulaUrl);
-                    toSet.Add("tosUrl", options.tosUrl);
+                    toSet.Add("termsAndConditionsUrl", options.termsAndConditionsUrl);
                     toSet.Add("privacyPolicyUrl", options.privacyPolicyUrl);
 
                     ZipPackage.SetSquirrelMetadata(nuspecPath, toSet);

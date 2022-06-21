@@ -56,7 +56,7 @@ namespace Squirrel.NuGet
         public byte[] AppIconBytes { get; private set; }
 
         public string EulaUrl { get; private set; }
-        public string TosUrl { get; private set; }
+        public string TermsAndConditionsUrl { get; private set; }
         public string PrivacyPolicyUrl { get; private set; }
         public byte[] ConsentWindowLogoBytes { get; private set; }
 
@@ -255,8 +255,8 @@ namespace Squirrel.NuGet
             case "eulaUrl":
                 EulaUrl = value;
                 break;
-            case "tosUrl":
-                TosUrl = value;
+            case "termsAndConditionsUrl":
+                TermsAndConditionsUrl = value;
                 break;
             case "privacyPolicyUrl":
                 PrivacyPolicyUrl = value;

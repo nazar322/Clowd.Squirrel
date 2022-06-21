@@ -138,7 +138,7 @@ namespace Squirrel.Update
             if (!silentInstall)
             {
                 var consentWindow = new InstallConsentWindow(appname, zp.SetupIconBytes, zp.ConsentWindowLogoBytes,
-                    zp.EulaUrl, zp.TosUrl, zp.PrivacyPolicyUrl);
+                    zp.EulaUrl, zp.TermsAndConditionsUrl, zp.PrivacyPolicyUrl);
                 consentWindow.Show();
                 if (!consentWindow.Result) {
                     return;

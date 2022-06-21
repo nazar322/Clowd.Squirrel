@@ -39,7 +39,7 @@ namespace Squirrel.Update.Windows
         private readonly Thread _thread;
         private readonly WindowProc _windowProcDelegate;
         private readonly string _eulaUrl;
-        private readonly string _tosUrl;
+        private readonly string _termsAndConditionsUrl;
         private readonly string _privacyPolicyUrl;
 
 
@@ -57,13 +57,14 @@ namespace Squirrel.Update.Windows
 
         public bool Result { get; private set; }
 
-        public InstallConsentWindow(string appName, byte[] iconBytes, byte[] logoBytes, string eulaUrl, string tosUrl, string privacyPolicyUrl)
+        public InstallConsentWindow(string appName, byte[] iconBytes, byte[] logoBytes, 
+            string eulaUrl, string termsAndConditionsUrl, string privacyPolicyUrl)
             : base(appName)
         {
             _windowProcDelegate = new WindowProc(this.WndProc);
 
             _eulaUrl = eulaUrl;
-            _tosUrl = tosUrl;
+            _termsAndConditionsUrl = termsAndConditionsUrl;
             _privacyPolicyUrl = privacyPolicyUrl;
 
             if (logoBytes is { Length: > 0 })
@@ -361,7 +362,7 @@ namespace Squirrel.Update.Windows
                 break;
 
             case (uint) WM_COMMAND when lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle():
-                OpenUrl(_tosUrl);
+                OpenUrl(_termsAndConditionsUrl);
                 break;
 
             case (uint) WM_CLOSE:
