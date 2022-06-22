@@ -321,7 +321,7 @@ namespace Squirrel.Update.Windows
                     lock (_img) g.DrawImage(_img, 0, 0, w, h);
 
                     //only should do a single draw operation to the window front buffer to prevent flickering
-                    wnd.DrawImage(buffer, leftPadding, 30, w, h);
+                    wnd.DrawImage(buffer, leftPadding, 0, w, h);
                 }
 
                 ValidateRect(hwnd, null);
