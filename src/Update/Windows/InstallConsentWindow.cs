@@ -19,6 +19,7 @@ using static Vanara.PInvoke.User32.WindowClassStyles;
 using static Vanara.PInvoke.User32.WindowMessage;
 using static Vanara.PInvoke.User32.WindowStyles;
 using static Vanara.PInvoke.User32.WindowStylesEx;
+using static Vanara.PInvoke.SHCore;
 
 namespace Squirrel.Update.Windows
 {
@@ -87,15 +88,11 @@ namespace Squirrel.Update.Windows
         private void ThreadProc()
         {
             try {
-                // this is also set in the manifest, but this won't hurt anything and can help if the manifest got replaced with something else.
-                //Commented-out because it is not available on Windows 7
-                //ThreadDpiScalingContext.SetCurrentThreadScalingMode(ThreadScalingMode.PerMonitorV2Aware);
-
-                _threadId = GetCurrentThreadId();
+               ThreadDpiScalingContext.SetCurrentThreadScalingMode(ThreadScalingMode.PerMonitorV2Aware);
+               _threadId = GetCurrentThreadId();
                 Create();
 
-                MSG msg;
-                PeekMessage(out msg, _hwnd, 0, 0, 0); // invoke creating message queue
+                PeekMessage(out var msg, _hwnd, 0, 0, 0); // invoke creating message queue
 
                 while ((GetMessage(out msg, HWND.NULL, 0, 0)) != false) {
                     if (msg.message == (uint) WM_QUIT)
@@ -140,6 +137,7 @@ namespace Squirrel.Update.Windows
             }
 
             int x, y, w, h;
+            double dpiRatioX = 1, dpiRatioY = 1;
             try {
                 // try to find monitor where mouse is
                 GetCursorPos(out var point);
@@ -151,19 +149,14 @@ namespace Squirrel.Update.Windows
                     throw new Win32Exception();
                 }
 
-                //Because call to GetDpiForMonitor requires SHCore.dll which is not available
-                //in Windows 7, we hard-wire the dpi values to 96 to suit most users
-                double dpiX = 96;
-                //double dpiY = 96;
+                if (GetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_DEFAULT, out var dpiX, out var dpiY) != HRESULT.S_OK)
+                {
+                    dpiX = dpiY = 96;
+                }
 
-                // calculate scaling factor for image. If the image does not have embedded dpi information, we default to 96
-                //double dpiRatioX = dpiX / 96d;
-                //double dpiRatioY = dpiY / 96d;
-                //var embeddedDpi = _img.PropertyIdList.Any(p => p == PropertyTagPixelPerUnitX || p == PropertyTagPixelPerUnitY);
-                //if (embeddedDpi) {
-                //    dpiRatioX = dpiX / _img.HorizontalResolution;
-                //    dpiRatioY = dpiY / _img.VerticalResolution;
-                //}
+                // calculate scaling factor. default to 96
+                dpiRatioX = dpiX / 96d;
+                dpiRatioY = dpiY / 96d;
 
                 _uizoom = dpiX / 96d; // ui ignores image dpi, just takes screen dpi
 
@@ -171,8 +164,8 @@ namespace Squirrel.Update.Windows
                 //w = (int)Math.Round(_img.Width * dpiRatioX);
                 //h = (int)Math.Round(_img.Height * dpiRatioY);
 
-                w = WindowWidth;
-                h = WindowHeight;
+                w = (int) Math.Round(WindowWidth * dpiRatioX);
+                h = (int) Math.Round(WindowHeight * dpiRatioY);
                 x = (mi.rcWork.Width - w) / 2;
                 y = (mi.rcWork.Height - h) / 2;
 
@@ -207,10 +200,10 @@ namespace Squirrel.Update.Windows
             _installButtonHwnd = CreateWindow("BUTTON",  // Predefined class; Unicode assumed 
                          "Install",      // Button text 
                          buttonStyle,
-                         245,         // x position 
-                         380,         // y position 
-                         100,        // Button width
-                         40,        // Button height
+                         (int)Math.Round(245 * dpiRatioX),         // x position 
+                         (int) Math.Round(380 * dpiRatioY),         // y position 
+                         (int) Math.Round(100 * dpiRatioX),        // Button width
+                         (int) Math.Round(40 * dpiRatioY),        // Button height
                          _hwnd,     // Parent window
                          HMENU.NULL,       // No menu.
                          instance,
@@ -219,10 +212,10 @@ namespace Squirrel.Update.Windows
             _cancelButtonHwnd = CreateWindow("BUTTON",  // Predefined class; Unicode assumed 
                          "Cancel",      // Button text 
                          buttonStyle,
-                         355,         // x position 
-                         380,         // y position 
-                         100,        // Button width
-                         40,        // Button height
+                         (int) Math.Round(355 * dpiRatioX),         // x position 
+                         (int) Math.Round(380 * dpiRatioY),         // y position 
+                         (int) Math.Round(100 * dpiRatioX),        // Button width
+                         (int) Math.Round(40 * dpiRatioY),        // Button height
                          _hwnd,     // Parent window
                          HMENU.NULL,       // No menu.
                          instance,
@@ -233,7 +226,7 @@ namespace Squirrel.Update.Windows
             var legalInfoText = CreateWindow("STATIC",
                             "By clicking on \"Install\" you are agreeing to our:",
                             WS_CHILD | WS_VISIBLE,
-                            leftPadding, 180, 460, 40,
+                            (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(180 * dpiRatioY), (int) Math.Round(460 * dpiRatioX), (int) Math.Round(40 * dpiRatioY),
                             _hwnd,
                             HMENU.NULL,
                             instance,
@@ -242,7 +235,7 @@ namespace Squirrel.Update.Windows
             _eulaLinkHwnd = CreateWindow("STATIC",
                                      "End User License Agreement",
                                      textStyle,
-                                     leftPadding, 230, 400, 30,
+                                     (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(230 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
                                      _hwnd,
                                      HMENU.NULL,
                                      instance,
@@ -251,7 +244,7 @@ namespace Squirrel.Update.Windows
             _termsAndConditionsLinkHwnd = CreateWindow("STATIC",
                                                    "Terms and Conditions",
                                                    textStyle,
-                                                   leftPadding, 270, 400, 30,
+                                                   (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(270 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
                                                    _hwnd,
                                                    HMENU.NULL,
                                                    instance,
@@ -260,7 +253,7 @@ namespace Squirrel.Update.Windows
             _privacyPolicyLinkHwnd = CreateWindow("STATIC",
                                              "Privacy Policy",
                                              textStyle,
-                                             leftPadding, 310, 400, 30,
+                                             (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(310 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
                                              _hwnd,
                                              HMENU.NULL,
                                              instance,
