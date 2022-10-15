@@ -1,16 +1,37 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include <versionhelpers.h>
 #include <string>
 #include <fstream>
+#include <winnls.h>
 #include "bundle_marker.h"
 #include "platform_util.h"
+
+#define OS_NOTSUPPORTED_EN L"This application requires Windows 8 or later and cannot be installed on this computer."
+#define OS_NOTSUPPORTED_UK L"Ця програма потребує Windows 8 або новішої версії, тому її неможливо встановити на цьому комп’ютері."
+#define OS_NOTSUPPORTED_ES L"Esta aplicación requiere Windows 8 o posterior y no se puede instalar en esta computadora."
+#define OS_NOTSUPPORTED_PT L"Este aplicativo requer o Windows 8 ou posterior e não pode ser instalado neste computador."
+#define OS_NOTSUPPORTED_NL L"Deze applicatie vereist Windows 8 of hoger en kan niet op deze computer worden geïnstalleerd."
+#define OS_NOTSUPPORTED_CN L"此应用程序需要 Windows 8 或更高版本，无法安装在此计算机上。"
 
 using namespace std;
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ PWSTR pCmdLine, _In_ int nCmdShow)
 {
     if (!IsWindows8OrGreater()) {
-        util::show_error_dialog(L"This application requires Windows 8 or later and cannot be installed on this computer.");
+        LCID localeId = GetThreadLocale();
+        WCHAR langNameBuff[5];
+        if (GetLocaleInfo(localeId, LOCALE_SISO639LANGNAME, langNameBuff, 5) == 0) {
+            util::show_error_dialog(OS_NOTSUPPORTED_EN);
+        }
+        else {
+            wstring langName(langNameBuff);
+	        if (langName._Equal(L"uk")) util::show_error_dialog(OS_NOTSUPPORTED_UK);
+            else if (langName._Equal(L"es")) util::show_error_dialog(OS_NOTSUPPORTED_ES);
+            else if (langName._Equal(L"pt")) util::show_error_dialog(OS_NOTSUPPORTED_PT);
+            else if (langName._Equal(L"nl")) util::show_error_dialog(OS_NOTSUPPORTED_NL);
+            else if (langName._Equal(L"cn")) util::show_error_dialog(OS_NOTSUPPORTED_CN);
+            else util::show_error_dialog(OS_NOTSUPPORTED_EN);
+        }
         return 0;
     }
 
