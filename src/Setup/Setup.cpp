@@ -9,8 +9,8 @@ using namespace std;
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ PWSTR pCmdLine, _In_ int nCmdShow)
 {
-    if (!IsWindows7SP1OrGreater()) {
-        util::show_error_dialog(L"This application requires Windows 7 SP1 or later and cannot be installed on this computer.");
+    if (!IsWindows8OrGreater()) {
+        util::show_error_dialog(L"This application requires Windows 8 or later and cannot be installed on this computer.");
         return 0;
     }
 
