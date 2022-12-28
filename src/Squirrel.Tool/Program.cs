@@ -19,7 +19,7 @@ namespace Squirrel.Tool
 {
     class Program
     {
-        const string CLOWD_PACKAGE_NAME = "Clowd.Squirrel";
+        const string CLOWD_PACKAGE_NAME = "Nazar.Squirrel";
 
         private static ConsoleLogger _logger;
 
