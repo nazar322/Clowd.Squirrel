@@ -103,7 +103,7 @@ namespace Squirrel.Tool
                 foreach (var kvp in packageSearchPaths) {
                     var path = String.Format(kvp.Value, version);
                     if (Directory.Exists(path)) {
-                        _logger.Write($"Running {CLOWD_PACKAGE_NAME} {version} from {kvp.Key}", LogLevel.Info);
+                        _logger.Write($"Running {CLOWD_PACKAGE_NAME} {version} from {kvp.Key} ({path})", LogLevel.Info);
                         return RunCsqFromPath(path, restArgs);
                     }
                 }
