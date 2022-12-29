@@ -35,8 +35,8 @@ msbuild /verbosity:minimal /restore /p:Configuration=Release
 # Build single-exe packaged projects and drop into nupkg
 Write-Host "Extracting Generated Packages" -ForegroundColor Magenta
 Set-Location "$PSScriptRoot\build\Release"
-seven x Clowd.Squirrel*.nupkg -osquirrel
-Remove-Item Clowd.Squirrel*.nupkg
+seven x Nazar322.Squirrel*.nupkg -osquirrel
+Remove-Item Nazar322.Squirrel*.nupkg
 
 Write-Host "Publishing SingleFile Projects" -ForegroundColor Magenta
 $ToolsDir = "squirrel\tools"
@@ -53,6 +53,6 @@ Remove-Item "$ToolsDir\*.pdb"
 Remove-Item "$ToolsDir\7za.exe"
 
 Write-Host "Re-assembling Packages" -ForegroundColor Magenta
-seven a "Clowd.Squirrel.$version.nupkg" -tzip -mx9 "$PSScriptRoot\build\Release\squirrel\*"
+seven a "Nazar322.Squirrel.$version.nupkg" -tzip -mx9 "$PSScriptRoot\build\Release\squirrel\*"
 
 Write-Host "Done." -ForegroundColor Magenta

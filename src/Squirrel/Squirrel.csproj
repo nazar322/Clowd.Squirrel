@@ -5,11 +5,15 @@
     <TargetFrameworks>net461;netstandard2.0;net5.0;net6.0</TargetFrameworks>
     <AssemblyName>Squirrel.Core</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageId>Clowd.Squirrel</PackageId>
+    <PackageId>Nazar322.Squirrel</PackageId>
     <Title>Squirrel Updater</Title>
     <Description>Quick and easy installer and automatic updates for desktop applications</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIcon>Clowd_200.png</PackageIcon>
+    <Authors>Nazar Grynko</Authors>
+    <Copyright>Copyright © Caelan Sayler and Nazar Grynko 2023</Copyright>
+    <PackageProjectUrl>https://github.com/nazar322/Clowd.Squirrel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nazar322/Clowd.Squirrel</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
