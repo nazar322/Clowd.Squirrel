@@ -462,7 +462,7 @@ namespace Squirrel
         public static IEnumerable<ReleaseEntry> FindCompatibleVersions(IEnumerable<ReleaseEntry> localReleases, RID compatibleRid)
         {
             if (!localReleases.Any()) {
-                return null;
+                return localReleases;
             }
 
             if (compatibleRid == null || !compatibleRid.IsValid) {

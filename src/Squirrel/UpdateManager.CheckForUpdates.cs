@@ -86,7 +86,7 @@ namespace Squirrel
             }
 
             var currentRelease = Utility.FindLatestFullVersion(localReleases, null);
-            var latestFullRelease = Utility.FindLatestFullVersion(remoteReleases, currentRelease.Rid);
+            var latestFullRelease = Utility.FindLatestFullVersion(remoteReleases, currentRelease?.Rid);
 
             if (latestFullRelease == currentRelease) {
                 this.Log().Info("No updates, remote and local are the same");
