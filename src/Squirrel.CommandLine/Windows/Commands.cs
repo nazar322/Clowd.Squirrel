@@ -35,6 +35,7 @@ namespace Squirrel.CommandLine.Windows
             var generateDeltas = !options.NoDelta;
             var backgroundGif = options.SplashImage;
             var setupIcon = options.Icon ?? options.AppIcon;
+            var consentLogo = options.ConsentWindowLogo;
 
             // normalize and validate that the provided frameworks are supported 
             var requiredFrameworks = Runtimes.ParseDependencyString(options.Runtimes);
@@ -143,7 +144,21 @@ namespace Squirrel.CommandLine.Windows
                                  "Shortcuts will be created for every binary in package.");
                     }
 
-                    ZipPackage.SetMetadata(nuspecPath, requiredFrameworks.Select(r => r.Id), options.TargetRuntime);
+                    Dictionary<string, string> toSet = new();
+
+                    var runtimes = requiredFrameworks.Select(r => r.Id).ToList();
+                    if (runtimes.Any())
+                        toSet.Add("runtimeDependencies", String.Join(",", runtimes));
+
+                    var rid = options.TargetRuntime;
+                    if (rid?.IsValid == true)
+                        toSet.Add("rid", rid.StringWithFullVersion);
+
+                    toSet.Add("eulaUrl", options.EulaUrl);
+                    toSet.Add("termsAndConditionsUrl", options.TermsAndConditionsUrl);
+                    toSet.Add("privacyPolicyUrl", options.PrivacyPolicyUrl);
+
+                    ZipPackage.SetMetadata(nuspecPath, toSet);
 
                     // create stub executable for all exe's in this package (except Squirrel!)
                     var exesToCreateStubFor = new DirectoryInfo(pkgPath).GetAllFilesRecursively()
@@ -199,6 +214,7 @@ namespace Squirrel.CommandLine.Windows
                     // copy other images to root (used by setup)
                     if (setupIcon != null) File.Copy(setupIcon, Path.Combine(pkgPath, "setup.ico"), true);
                     if (backgroundGif != null) File.Copy(backgroundGif, Path.Combine(pkgPath, "splashimage" + Path.GetExtension(backgroundGif)));
+                    if (consentLogo != null) File.Copy(consentLogo, Path.Combine(pkgPath, "consentLogo" + Path.GetExtension(consentLogo)));
 
                     return Path.Combine(targetDir, ReleasePackageBuilder.GetSuggestedFileName(spec.Id, spec.Version.ToString(), options.TargetRuntime.StringWithNoVersion));
                 });

@@ -26,6 +26,8 @@ namespace Squirrel.NuGet
         public byte[] SetupIconBytes { get; private set; }
         public byte[] AppIconBytes { get; private set; }
 
+        public byte[] ConsentWindowLogoBytes { get; private set; }
+
         public ZipPackage(string filePath) : this(File.OpenRead(filePath))
         {
         }
@@ -42,6 +44,7 @@ namespace Squirrel.NuGet
             SetupSplashBytes = ReadFileToBytes(zip, z => Path.GetFileNameWithoutExtension(z.Key) == "splashimage");
             SetupIconBytes = ReadFileToBytes(zip, z => z.Key == "setup.ico");
             AppIconBytes = ReadFileToBytes(zip, z => z.Key == "app.ico") ?? ReadFileToBytes(zip, z => z.Key.EndsWith("app.ico"));
+            ConsentWindowLogoBytes = ReadFileToBytes(zip, z => Path.GetFileNameWithoutExtension(z.Key) == "consentLogo");
         }
 
         private byte[] ReadFileToBytes(ZipArchive archive, Func<ZipArchiveEntry, bool> predicate)

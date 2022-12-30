@@ -65,6 +65,11 @@ namespace Squirrel.CommandLine.Commands
 
         public string MsiVersion { get; private set; }
 
+        public string EulaUrl { get; private set; }
+        public string TermsAndConditionsUrl { get; private set; }
+        public string PrivacyPolicyUrl { get; private set; }
+        public string ConsentWindowLogo { get; private set; }
+
         public ReleasifyWindowsCommand()
             : this("releasify", "Take an existing nuget package and convert it into a Squirrel release.")
         {
@@ -134,6 +139,22 @@ namespace Squirrel.CommandLine.Commands
                     .SetDescription("Override the product version for the generated msi.")
                     .SetArgumentHelpName("VERSION")
                     .MustBeValidMsiVersion();
+
+                AddOption<string>((v) => EulaUrl = v, "--eulaUrl")
+                    .SetDescription("Url to End User License Agreement that will be used by the consent window")
+                    .SetArgumentHelpName("URL");
+
+                AddOption<string>((v) => TermsAndConditionsUrl = v, "--termsAndConditionsUrl")
+                    .SetDescription("Url to Terms and Conditions that will be used by the consent window")
+                    .SetArgumentHelpName("URL");
+
+                AddOption<string>((v) => PrivacyPolicyUrl = v, "--privacyPolicyUrl")
+                    .SetDescription("Url to Privacy Policy that will be used by the consent window")
+                    .SetArgumentHelpName("URL");
+
+                AddOption<string>((v) => ConsentWindowLogo = v, "--consentWindowLogo")
+                    .SetDescription("File path to the logo displayed in the install consent window")
+                    .SetArgumentHelpName("PATH");
             }
         }
     }

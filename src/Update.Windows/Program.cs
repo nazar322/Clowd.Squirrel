@@ -9,6 +9,7 @@ using Squirrel.Lib;
 using Squirrel.NuGet;
 using Squirrel.SimpleSplat;
 using Squirrel.Sources;
+using Squirrel.Update.Windows;
 using static Squirrel.Runtimes.RuntimeInstallResult;
 
 namespace Squirrel.Update
@@ -139,6 +140,19 @@ namespace Squirrel.Update
 
             var zp = new ZipPackage(fs, true);
             var appname = zp.ProductName;
+
+            // If not silent install and at least one of the consent parameters present
+            // display install consent window
+            if (!silentInstall && (!string.IsNullOrWhiteSpace(zp.EulaUrl)
+                                   || !string.IsNullOrWhiteSpace(zp.TermsAndConditionsUrl)
+                                   || !string.IsNullOrWhiteSpace(zp.PrivacyPolicyUrl))) 
+            {
+                var consentWindow = new InstallConsentWindow(appname, zp.SetupIconBytes, zp.ConsentWindowLogoBytes,
+                    zp.EulaUrl, zp.TermsAndConditionsUrl, zp.PrivacyPolicyUrl);
+                consentWindow.Show();
+                if (!consentWindow.Result)
+                    return;
+            }
 
             if (checkInstall) {
                 // CS: migrated from MachineInstaller.cpp

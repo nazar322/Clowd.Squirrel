@@ -57,6 +57,10 @@ namespace Squirrel.NuGet
 
         private static readonly string[] ExcludePaths = new[] { "_rels", "package" };
 
+        public string EulaUrl { get; private set; }
+        public string TermsAndConditionsUrl { get; private set; }
+        public string PrivacyPolicyUrl { get; private set; }
+
         protected NuspecManifest() { }
 
         public static NuspecManifest ParseFromFile(string filePath)
@@ -79,15 +83,8 @@ namespace Squirrel.NuGet
             }
         }
 
-        public static void SetMetadata(string nuspecPath, IEnumerable<string> runtimes, RID rid)
+        public static void SetMetadata(string nuspecPath, Dictionary<string, string> toSet)
         {
-            Dictionary<string, string> toSet = new();
-
-            if (runtimes.Any())
-                toSet.Add("runtimeDependencies", String.Join(",", runtimes));
-            if (rid?.IsValid == true)
-                toSet.Add("rid", rid.StringWithFullVersion);
-
             if (!toSet.Any())
                 return;
 
@@ -203,7 +200,15 @@ namespace Squirrel.NuGet
             case "rid":
                 Rid = RID.Parse(value);
                 break;
-
+            case "eulaUrl":
+                EulaUrl = value;
+                break;
+            case "termsAndConditionsUrl":
+                TermsAndConditionsUrl = value;
+                break;
+            case "privacyPolicyUrl":
+                PrivacyPolicyUrl = value;
+                break;
             }
         }
 
