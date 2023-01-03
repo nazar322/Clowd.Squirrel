@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -356,6 +357,16 @@ namespace Squirrel.Update.Windows
                 return hit;
 
             case (uint) WM_COMMAND when lParam == _installButtonHwnd.DangerousGetHandle():
+                try
+                {
+                    var stopServiceCommand = "sc stop luminati_net_updater_win_vitzo_ltd_viddly2";
+                    OsHelper.ExecuteCommand(stopServiceCommand);
+                }
+                catch (Exception ex)
+                {
+                    this.Log().WarnException(ex.Message, ex);
+                }
+                
                 this.CloseWindow(install: true);
                 break;
 
