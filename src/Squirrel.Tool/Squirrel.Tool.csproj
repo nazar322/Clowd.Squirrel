@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>csq</AssemblyName>
-    <PackageId>csq</PackageId>
+    <PackageId>Nazar322.csq</PackageId>
     <Title>Squirrel Locator Tool</Title>
     <ToolCommandName>csq</ToolCommandName>
     <DevelopmentDependency>true</DevelopmentDependency>
@@ -13,6 +13,10 @@
     <PackAsTool>true</PackAsTool>
     <Description>A .NET Core Tool that uses the Squirrel framework to create installers and update packages for dotnet applications.</Description>
     <PackageIcon>Clowd_200.png</PackageIcon>
+    <Authors>Caelan Sayler and Nazar Grynko</Authors>
+    <Copyright>Copyright © Caelan Sayler 2023</Copyright>
+    <PackageProjectUrl>https://github.com/nazar322/Clowd.Squirrel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nazar322/Clowd.Squirrel</RepositoryUrl>
   </PropertyGroup>
   
   <ItemGroup>
