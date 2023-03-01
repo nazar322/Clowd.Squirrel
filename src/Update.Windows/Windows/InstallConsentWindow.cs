@@ -269,6 +269,15 @@ namespace Squirrel.Update.Windows
                                              instance,
                                              IntPtr.Zero);
 
+            var installationNoteText = CreateWindow("STATIC",
+                "It is not possible to cancel the installation once it has started.",
+                WS_CHILD | WS_VISIBLE,
+                (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(350 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
+                _hwnd,
+                HMENU.NULL,
+                instance,
+                IntPtr.Zero);
+
             var result = SetWindowSubclass(_eulaLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_privacyPolicyLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_termsAndConditionsLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
@@ -284,6 +293,9 @@ namespace Squirrel.Update.Windows
             SendMessage(legalInfoText,
                        (uint) WM_SETFONT,
                        CreateFont(cHeight: 24, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
+            SendMessage(installationNoteText,
+                (uint) WM_SETFONT,
+                CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
 
             SendMessage(_eulaLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_termsAndConditionsLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
