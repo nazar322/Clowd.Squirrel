@@ -41,7 +41,7 @@ namespace Squirrel.Update.Windows
         private const int PropertyTagPixelPerUnitY = 0x5112;
         private const int leftPadding = 30;
         private const int WindowWidth = 535;
-        private const int WindowHeight = 560;
+        private const int WindowHeight = 575;
         private const string WINDOW_CLASS_NAME = "SquirrelInstallConsentWindow";
 
         private readonly Bitmap _img;
@@ -208,7 +208,7 @@ namespace Squirrel.Update.Windows
                          "Install",      // Button text 
                          buttonStyle,
                          295,         // x position 
-                         470,         // y position 
+                         485,         // y position 
                          100,        // Button width
                          40,        // Button height
                          _hwnd,     // Parent window
@@ -220,7 +220,7 @@ namespace Squirrel.Update.Windows
                          "Cancel",      // Button text 
                          buttonStyle,
                          405,         // x position 
-                         470,         // y position 
+                         485,         // y position 
                          100,        // Button width
                          40,        // Button height
                          _hwnd,     // Parent window
@@ -267,9 +267,9 @@ namespace Squirrel.Update.Windows
                                              IntPtr.Zero);
 
             var endFolderNoticeText = CreateWindow("STATIC",
-                "Files are installed into this folder to ensure Viddly always stays up to date and receives critical updates without extra permissions: %localappdata%/Viddly",
+                $"Files are installed into this folder to ensure Viddly always stays up to date and receives critical updates without extra permissions: {Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Viddly",
                 WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
-                leftPadding, 300, 470, 50,
+                leftPadding, 300, 470, 55,
                 _hwnd,
                 HMENU.NULL,
                 instance,
@@ -278,14 +278,14 @@ namespace Squirrel.Update.Windows
             var bdSdkLegalNotice = CreateWindow("STATIC",
                 "Viddly installs Bright Data components (no execution).\r\nYou will be able to view the component details in full before you accept this offer, as well as being able to turn Bright Data on and off directly from the 'App Settings'. Read more about Bright Data's EULA",
                 WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
-                leftPadding, 350, 470, 90,
+                leftPadding, 365, 470, 90,
                 _hwnd,
                 HMENU.NULL,
                 instance,
                 IntPtr.Zero);
 
             var bdSdkEulaUrlX = leftPadding + 275;
-            var bdSdkEulaUrlY = 400;
+            var bdSdkEulaUrlY = 415;
 
             _bdSdkEulaUrl = CreateWindow("STATIC",
                 "here",
@@ -299,7 +299,7 @@ namespace Squirrel.Update.Windows
             var installationNoteText = CreateWindow("STATIC",
                 "It is not possible to cancel the installation once it has started.",
                 WS_CHILD | WS_VISIBLE,
-                leftPadding, 430, 470, 30,
+                leftPadding, 445, 470, 30,
                 _hwnd,
                 HMENU.NULL,
                 instance,
