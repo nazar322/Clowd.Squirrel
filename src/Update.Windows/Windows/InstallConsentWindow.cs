@@ -40,8 +40,8 @@ namespace Squirrel.Update.Windows
         private const int PropertyTagPixelPerUnitX = 0x5111;
         private const int PropertyTagPixelPerUnitY = 0x5112;
         private const int leftPadding = 30;
-        private const int WindowWidth = 485;
-        private const int WindowHeight = 475;
+        private const int WindowWidth = 535;
+        private const int WindowHeight = 560;
         private const string WINDOW_CLASS_NAME = "SquirrelInstallConsentWindow";
 
         private readonly Bitmap _img;
@@ -63,6 +63,7 @@ namespace Squirrel.Update.Windows
         private SafeHWND _eulaLinkHwnd;
         private SafeHWND _privacyPolicyLinkHwnd;
         private SafeHWND _termsAndConditionsLinkHwnd;
+        private SafeHWND _bdSdkEulaUrl;
 
         public bool Result { get; private set; }
 
@@ -100,9 +101,8 @@ namespace Squirrel.Update.Windows
 
                 PeekMessage(out var msg, _hwnd, 0, 0, 0); // invoke creating message queue
 
-                while ((GetMessage(out msg, HWND.NULL, 0, 0)) != false)
-                {
-                    if (msg.message == (uint)WM_QUIT)
+                while ((GetMessage(out msg, HWND.NULL, 0, 0)) != false) {
+                    if (msg.message == (uint) WM_QUIT)
                         break;
 
                     TranslateMessage(msg);
@@ -207,10 +207,10 @@ namespace Squirrel.Update.Windows
             _installButtonHwnd = CreateWindow("BUTTON",  // Predefined class; Unicode assumed 
                          "Install",      // Button text 
                          buttonStyle,
-                         (int) Math.Round(245 * dpiRatioX),         // x position 
-                         (int) Math.Round(380 * dpiRatioY),         // y position 
-                         (int) Math.Round(100 * dpiRatioX),        // Button width
-                         (int) Math.Round(40 * dpiRatioY),        // Button height
+                         295,         // x position 
+                         470,         // y position 
+                         100,        // Button width
+                         40,        // Button height
                          _hwnd,     // Parent window
                          HMENU.NULL,       // No menu.
                          instance,
@@ -219,10 +219,10 @@ namespace Squirrel.Update.Windows
             _cancelButtonHwnd = CreateWindow("BUTTON",  // Predefined class; Unicode assumed 
                          "Cancel",      // Button text 
                          buttonStyle,
-                         (int) Math.Round(355 * dpiRatioX),         // x position 
-                         (int) Math.Round(380 * dpiRatioY),         // y position 
-                         (int) Math.Round(100 * dpiRatioX),        // Button width
-                         (int) Math.Round(40 * dpiRatioY),        // Button height
+                         405,         // x position 
+                         470,         // y position 
+                         100,        // Button width
+                         40,        // Button height
                          _hwnd,     // Parent window
                          HMENU.NULL,       // No menu.
                          instance,
@@ -233,7 +233,7 @@ namespace Squirrel.Update.Windows
             var legalInfoText = CreateWindow("STATIC",
                             "By clicking on \"Install\" you are agreeing to our:",
                             WS_CHILD | WS_VISIBLE,
-                            (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(180 * dpiRatioY), (int) Math.Round(460 * dpiRatioX), (int) Math.Round(40 * dpiRatioY),
+                            leftPadding, 160, 460, 40,
                             _hwnd,
                             HMENU.NULL,
                             instance,
@@ -242,7 +242,7 @@ namespace Squirrel.Update.Windows
             _eulaLinkHwnd = CreateWindow("STATIC",
                                      "End User License Agreement",
                                      textStyle,
-                                     (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(230 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
+                                     leftPadding, 200, 400, 26,
                                      _hwnd,
                                      HMENU.NULL,
                                      instance,
@@ -251,7 +251,7 @@ namespace Squirrel.Update.Windows
             _termsAndConditionsLinkHwnd = CreateWindow("STATIC",
                                                    "Terms and Conditions",
                                                    textStyle,
-                                                   (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(270 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
+                                                   leftPadding, 230, 400, 26,
                                                    _hwnd,
                                                    HMENU.NULL,
                                                    instance,
@@ -260,16 +260,46 @@ namespace Squirrel.Update.Windows
             _privacyPolicyLinkHwnd = CreateWindow("STATIC",
                                              "Privacy Policy",
                                              textStyle,
-                                             (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(310 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
+                                             leftPadding, 260, 400, 26,
                                              _hwnd,
                                              HMENU.NULL,
                                              instance,
                                              IntPtr.Zero);
 
+            var endFolderNoticeText = CreateWindow("STATIC",
+                "Files are installed into this folder to ensure Viddly always stays up to date and receives critical updates without extra permissions: %localappdata%/Viddly",
+                WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
+                leftPadding, 300, 470, 50,
+                _hwnd,
+                HMENU.NULL,
+                instance,
+                IntPtr.Zero);
+
+            var bdSdkLegalNotice = CreateWindow("STATIC",
+                "Viddly installs Bright Data components (no execution).\r\nYou will be able to view the component details in full before you accept this offer, as well as being able to turn Bright Data on and off directly from the 'App Settings'. Read more about Bright Data's EULA",
+                WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
+                leftPadding, 350, 470, 90,
+                _hwnd,
+                HMENU.NULL,
+                instance,
+                IntPtr.Zero);
+
+            var bdSdkEulaUrlX = leftPadding + 275;
+            var bdSdkEulaUrlY = 400;
+
+            _bdSdkEulaUrl = CreateWindow("STATIC",
+                "here",
+                textStyle | WS_CLIPSIBLINGS,
+                bdSdkEulaUrlX, bdSdkEulaUrlY, 30, 20,
+                _hwnd,
+                HMENU.NULL,
+                instance,
+                IntPtr.Zero);
+
             var installationNoteText = CreateWindow("STATIC",
                 "It is not possible to cancel the installation once it has started.",
                 WS_CHILD | WS_VISIBLE,
-                (int) Math.Round(leftPadding * dpiRatioX), (int) Math.Round(350 * dpiRatioY), (int) Math.Round(400 * dpiRatioX), (int) Math.Round(30 * dpiRatioY),
+                leftPadding, 430, 470, 30,
                 _hwnd,
                 HMENU.NULL,
                 instance,
@@ -278,11 +308,13 @@ namespace Squirrel.Update.Windows
             var result = SetWindowSubclass(_eulaLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_privacyPolicyLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_termsAndConditionsLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
+            result = SetWindowSubclass(_bdSdkEulaUrl.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
 
             ShowWindow(_hwnd, ShowWindowCommand.SW_SHOWNOACTIVATE);
 
             var guiFont = GetStockObject(Gdi32.StockObjectType.DEFAULT_GUI_FONT);
             var linkFont = CreateFont(24, 0, 0, 0, FW_LIGHT, false, pszFaceName: "Segoe UI", bUnderline: true);
+            var linkFont2 = CreateFont(18, 0, 0, 0, FW_LIGHT, false, pszFaceName: "Segoe UI", bUnderline: true);
 
             SendMessage(_cancelButtonHwnd, (uint) WM_SETFONT, (IntPtr) guiFont, true);
             SendMessage(_installButtonHwnd, (uint) WM_SETFONT, (IntPtr) guiFont, true);
@@ -290,13 +322,23 @@ namespace Squirrel.Update.Windows
             SendMessage(legalInfoText,
                        (uint) WM_SETFONT,
                        CreateFont(cHeight: 24, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
+            SendMessage(endFolderNoticeText,
+                (uint) WM_SETFONT,
+                CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
+            SendMessage(bdSdkLegalNotice,
+                (uint) WM_SETFONT,
+                CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
             SendMessage(installationNoteText,
                 (uint) WM_SETFONT,
-                CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
+                CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
 
             SendMessage(_eulaLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_termsAndConditionsLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_privacyPolicyLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
+            SendMessage(_bdSdkEulaUrl, (uint) WM_SETFONT, linkFont2.DangerousGetHandle(), true);
+
+            // Overlap it
+            SetWindowPos(_bdSdkEulaUrl, HWND.HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
             DeleteObject(guiFont);
         }
@@ -304,12 +346,12 @@ namespace Squirrel.Update.Windows
         private IntPtr HyperlinkProc(IntPtr hwnd, uint umsg, IntPtr wparam, IntPtr lparam, uint uidsubclass, IntPtr dwrefdata)
         {
             switch (umsg) {
-                case (int) WM_SETCURSOR:
-                    var cursor = LoadCursor(IntPtr.Zero, IDC_HAND);
-                    SetCursor(cursor);
-                    return (IntPtr) 1;
-                default:
-                    return DefSubclassProc(hwnd, umsg, wparam, lparam);
+            case (int) WM_SETCURSOR:
+                var cursor = LoadCursor(IntPtr.Zero, IDC_HAND);
+                SetCursor(cursor);
+                return (IntPtr) 1;
+            default:
+                return DefSubclassProc(hwnd, umsg, wparam, lparam);
             }
         }
 
@@ -321,7 +363,8 @@ namespace Squirrel.Update.Windows
                 //This is how to change static text foreground and background colors
                 if (lParam == _eulaLinkHwnd.DangerousGetHandle() ||
                    lParam == _privacyPolicyLinkHwnd.DangerousGetHandle() ||
-                   lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle()) {
+                   lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle() ||
+                   lParam == _bdSdkEulaUrl.DangerousGetHandle()) {
                     SetTextColor(hdc, new COLORREF(0, 0, 255));
                 }
 
@@ -341,7 +384,7 @@ namespace Squirrel.Update.Windows
                     lock (_img) g.DrawImage(_img, 0, 0, w, h);
 
                     //only should do a single draw operation to the window front buffer to prevent flickering
-                    wnd.DrawImage(buffer, leftPadding, 0, w, h);
+                    wnd.DrawImage(buffer, leftPadding + 25, 0, w, h);
                 }
 
                 ValidateRect(hwnd, null);
@@ -372,7 +415,7 @@ namespace Squirrel.Update.Windows
                 } catch (Exception ex) {
                     this.Log().WarnException(ex.Message, ex);
                 }
-                
+
                 this.CloseWindow(install: true);
                 break;
 
@@ -390,6 +433,10 @@ namespace Squirrel.Update.Windows
 
             case (uint) WM_COMMAND when lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle():
                 OpenUrl(_termsAndConditionsUrl);
+                break;
+
+            case (uint) WM_COMMAND when lParam == _bdSdkEulaUrl.DangerousGetHandle():
+                OpenUrl("https://brightdata.com/legal/sdk-eula");
                 break;
 
             case (uint) WM_CLOSE:
