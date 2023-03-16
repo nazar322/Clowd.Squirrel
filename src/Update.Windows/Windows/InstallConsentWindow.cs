@@ -93,9 +93,8 @@ namespace Squirrel.Update.Windows
 
         private void ThreadProc()
         {
-            try
-            {
-                ThreadDpiScalingContext.SetCurrentThreadScalingMode(ThreadScalingMode.PerMonitorV2Aware);
+            try {
+                //ThreadDpiScalingContext.SetCurrentThreadScalingMode(ThreadScalingMode.PerMonitorV2Aware);
                 _threadId = GetCurrentThreadId();
                 Create();
 
@@ -111,9 +110,7 @@ namespace Squirrel.Update.Windows
                 }
 
                 DestroyWindow(_hwnd);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 this.Log().WarnException(ex.Message, ex);
                 _signal.Set();
             }
@@ -369,13 +366,10 @@ namespace Squirrel.Update.Windows
                 return hit;
 
             case (uint) WM_COMMAND when lParam == _installButtonHwnd.DangerousGetHandle():
-                try
-                {
+                try {
                     var stopServiceCommand = "sc stop luminati_net_updater_win_vitzo_ltd_viddly2";
                     OsHelper.ExecuteCommand(stopServiceCommand);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     this.Log().WarnException(ex.Message, ex);
                 }
                 
@@ -413,12 +407,10 @@ namespace Squirrel.Update.Windows
 
         private void OpenUrl(string url)
         {
-            try 
-            {
+            try {
                 ShellExecute(_hwnd, "open", url, null, null, ShowWindowCommand.SW_SHOWNORMAL);
                 System.Diagnostics.Process.Start(url);
-            } 
-            catch { }
+            } catch { }
         }
 
         private void CloseWindow(bool install)
