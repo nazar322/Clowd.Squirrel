@@ -41,7 +41,7 @@ namespace Squirrel.Update.Windows
         private const int PropertyTagPixelPerUnitY = 0x5112;
         private const int leftPadding = 30;
         private const int WindowWidth = 535;
-        private const int WindowHeight = 575;
+        private const int WindowHeight = 470;
         private const string WINDOW_CLASS_NAME = "SquirrelInstallConsentWindow";
 
         private readonly Bitmap _img;
@@ -53,7 +53,7 @@ namespace Squirrel.Update.Windows
         private readonly string _termsAndConditionsUrl;
         private readonly string _privacyPolicyUrl;
 
-
+        private int _pageNumber = 1;
         private uint _threadId;
         private double _uizoom = 1d;
 
@@ -64,6 +64,10 @@ namespace Squirrel.Update.Windows
         private SafeHWND _privacyPolicyLinkHwnd;
         private SafeHWND _termsAndConditionsLinkHwnd;
         private SafeHWND _bdSdkEulaUrl;
+        private SafeHWND _legalInfoText;
+        private SafeHWND _bdSdkLegalNotice;
+        private SafeHWND _endFolderNoticeText;
+        private SafeHWND _installationNoteText;
 
         public bool Result { get; private set; }
 
@@ -205,10 +209,10 @@ namespace Squirrel.Update.Windows
             var buttonStyle = (WindowStyles) ((int) WS_CHILD | (int) WS_VISIBLE | (int) WS_TABSTOP | (int) ButtonStyle.BS_FLAT);
 
             _installButtonHwnd = CreateWindow("BUTTON",  // Predefined class; Unicode assumed 
-                         "Install",      // Button text 
+                         "Continue >",      // Button text 
                          buttonStyle,
                          295,         // x position 
-                         485,         // y position 
+                         380,         // y position 
                          100,        // Button width
                          40,        // Button height
                          _hwnd,     // Parent window
@@ -220,7 +224,7 @@ namespace Squirrel.Update.Windows
                          "Cancel",      // Button text 
                          buttonStyle,
                          405,         // x position 
-                         485,         // y position 
+                         380,         // y position 
                          100,        // Button width
                          40,        // Button height
                          _hwnd,     // Parent window
@@ -230,8 +234,8 @@ namespace Squirrel.Update.Windows
 
             var textStyle = (WindowStyles) ((int) WS_CHILD | (int) WS_VISIBLE | (int) (StaticStyle.SS_NOTIFY));
 
-            var legalInfoText = CreateWindow("STATIC",
-                            "By clicking on \"Install\" you are agreeing to our:",
+            _legalInfoText = CreateWindow("STATIC",
+                            "By clicking Continue you are agreeing to our:",
                             WS_CHILD | WS_VISIBLE,
                             leftPadding, 160, 460, 40,
                             _hwnd,
@@ -266,26 +270,26 @@ namespace Squirrel.Update.Windows
                                              instance,
                                              IntPtr.Zero);
 
-            var endFolderNoticeText = CreateWindow("STATIC",
+            _endFolderNoticeText = CreateWindow("STATIC",
                 $"Files are installed into this folder to ensure Viddly always stays up to date and receives critical updates without extra permissions: {Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Viddly",
-                WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
-                leftPadding, 300, 470, 55,
+                WS_CHILD | WS_CLIPSIBLINGS,
+                leftPadding, 160, 470, 75,
                 _hwnd,
                 HMENU.NULL,
                 instance,
                 IntPtr.Zero);
 
-            var bdSdkLegalNotice = CreateWindow("STATIC",
+            _bdSdkLegalNotice = CreateWindow("STATIC",
                 "Viddly installs Bright Data components (no execution).\r\nYou will be able to view the component details in full before you accept this offer, as well as being able to turn Bright Data on and off directly from the 'App Settings'. Read more about Bright Data's EULA",
                 WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
-                leftPadding, 365, 470, 90,
+                leftPadding, 300, 470, 90,
                 _hwnd,
                 HMENU.NULL,
                 instance,
                 IntPtr.Zero);
 
             var bdSdkEulaUrlX = leftPadding + 275;
-            var bdSdkEulaUrlY = 415;
+            var bdSdkEulaUrlY = 350;
 
             _bdSdkEulaUrl = CreateWindow("STATIC",
                 "here",
@@ -296,10 +300,10 @@ namespace Squirrel.Update.Windows
                 instance,
                 IntPtr.Zero);
 
-            var installationNoteText = CreateWindow("STATIC",
+            _installationNoteText = CreateWindow("STATIC",
                 "It is not possible to cancel the installation once it has started.",
-                WS_CHILD | WS_VISIBLE,
-                leftPadding, 445, 470, 30,
+                WS_CHILD,
+                leftPadding, 245, 470, 30,
                 _hwnd,
                 HMENU.NULL,
                 instance,
@@ -319,18 +323,18 @@ namespace Squirrel.Update.Windows
             SendMessage(_cancelButtonHwnd, (uint) WM_SETFONT, (IntPtr) guiFont, true);
             SendMessage(_installButtonHwnd, (uint) WM_SETFONT, (IntPtr) guiFont, true);
 
-            SendMessage(legalInfoText,
+            SendMessage(_legalInfoText,
                        (uint) WM_SETFONT,
                        CreateFont(cHeight: 24, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
-            SendMessage(endFolderNoticeText,
+            SendMessage(_endFolderNoticeText,
+                (uint) WM_SETFONT,
+                CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
+            SendMessage(_bdSdkLegalNotice,
                 (uint) WM_SETFONT,
                 CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
-            SendMessage(bdSdkLegalNotice,
+            SendMessage(_installationNoteText,
                 (uint) WM_SETFONT,
-                CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
-            SendMessage(installationNoteText,
-                (uint) WM_SETFONT,
-                CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
+                CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
 
             SendMessage(_eulaLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_termsAndConditionsLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
@@ -357,14 +361,16 @@ namespace Squirrel.Update.Windows
 
         private nint WndProc(HWND hwnd, uint uMsg, IntPtr wParam, IntPtr lParam)
         {
-            switch (uMsg) {
+            switch (uMsg) 
+            {
             case (uint) WM_CTLCOLORSTATIC:
                 var hdc = (HDC) wParam;
                 //This is how to change static text foreground and background colors
                 if (lParam == _eulaLinkHwnd.DangerousGetHandle() ||
                    lParam == _privacyPolicyLinkHwnd.DangerousGetHandle() ||
                    lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle() ||
-                   lParam == _bdSdkEulaUrl.DangerousGetHandle()) {
+                   lParam == _bdSdkEulaUrl.DangerousGetHandle()) 
+                {
                     SetTextColor(hdc, new COLORREF(0, 0, 255));
                 }
 
@@ -379,7 +385,8 @@ namespace Squirrel.Update.Windows
 
                 using (var buffer = new Bitmap(w, h))
                 using (var g = Graphics.FromImage(buffer))
-                using (var wnd = Graphics.FromHwnd(hwnd.DangerousGetHandle())) {
+                using (var wnd = Graphics.FromHwnd(hwnd.DangerousGetHandle())) 
+                {
                     //draw image to back buffer
                     lock (_img) g.DrawImage(_img, 0, 0, w, h);
 
@@ -409,14 +416,39 @@ namespace Squirrel.Update.Windows
                 return hit;
 
             case (uint) WM_COMMAND when lParam == _installButtonHwnd.DangerousGetHandle():
-                try {
-                    var stopServiceCommand = "sc stop luminati_net_updater_win_vitzo_ltd_viddly2";
-                    OsHelper.ExecuteCommand(stopServiceCommand);
-                } catch (Exception ex) {
-                    this.Log().WarnException(ex.Message, ex);
+                switch (_pageNumber) 
+                {
+                case 1:
+                    ShowWindow(_legalInfoText, ShowWindowCommand.SW_HIDE);
+                    ShowWindow(_eulaLinkHwnd, ShowWindowCommand.SW_HIDE);
+                    ShowWindow(_termsAndConditionsLinkHwnd, ShowWindowCommand.SW_HIDE);
+                    ShowWindow(_privacyPolicyLinkHwnd, ShowWindowCommand.SW_HIDE);
+                    ShowWindow(_bdSdkLegalNotice, ShowWindowCommand.SW_HIDE);
+                    ShowWindow(_bdSdkEulaUrl, ShowWindowCommand.SW_HIDE);
+
+                    ShowWindow(_endFolderNoticeText, ShowWindowCommand.SW_SHOW);
+                    ShowWindow(_installationNoteText, ShowWindowCommand.SW_SHOW);
+
+                    SetWindowText(_installButtonHwnd, "Install");
+
+                    _pageNumber = 2;
+                    break;
+
+                case 2:
+                    try 
+                    {
+                        var stopServiceCommand = "sc stop luminati_net_updater_win_vitzo_ltd_viddly2";
+                        OsHelper.ExecuteCommand(stopServiceCommand);
+                    } 
+                    catch (Exception ex) 
+                    {
+                        this.Log().WarnException(ex.Message, ex);
+                    }
+
+                    this.CloseWindow(install: true);
+                    break;
                 }
 
-                this.CloseWindow(install: true);
                 break;
 
             case (uint) WM_COMMAND when lParam == _cancelButtonHwnd.DangerousGetHandle():
@@ -454,10 +486,12 @@ namespace Squirrel.Update.Windows
 
         private void OpenUrl(string url)
         {
-            try {
+            try 
+            {
                 ShellExecute(_hwnd, "open", url, null, null, ShowWindowCommand.SW_SHOWNORMAL);
                 System.Diagnostics.Process.Start(url);
-            } catch { }
+            } 
+            catch { }
         }
 
         private void CloseWindow(bool install)
