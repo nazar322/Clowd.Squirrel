@@ -244,7 +244,11 @@ namespace Squirrel.CommandLine.Windows
             ReleaseEntry.WriteReleaseFile(releaseEntries, releaseFilePath);
 
             var bundledzp = new ZipPackage(package);
-            var targetSetupExe = Path.Combine(targetDir, $"{bundledzp.Id}Setup-{options.TargetRuntime.StringWithNoVersion}.exe");
+            var setupName = $"{bundledzp.Id}Setup-{options.TargetRuntime.StringWithNoVersion}.exe";
+            if (!string.IsNullOrEmpty(options.SetupName)) {
+                setupName = options.SetupName;
+            }
+            var targetSetupExe = Path.Combine(targetDir, setupName);
             File.Copy(options.DebugSetupExe ?? HelperExe.SetupPath, targetSetupExe, true);
 
             if (SquirrelRuntimeInfo.IsWindows) {

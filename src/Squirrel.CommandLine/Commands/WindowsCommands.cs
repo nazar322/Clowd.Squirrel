@@ -65,6 +65,8 @@ namespace Squirrel.CommandLine.Commands
 
         public string MsiVersion { get; private set; }
 
+        public string SetupName { get; private set; }
+
         public string EulaUrl { get; private set; }
         public string TermsAndConditionsUrl { get; private set; }
         public string PrivacyPolicyUrl { get; private set; }
@@ -139,6 +141,10 @@ namespace Squirrel.CommandLine.Commands
                     .SetDescription("Override the product version for the generated msi.")
                     .SetArgumentHelpName("VERSION")
                     .MustBeValidMsiVersion();
+
+                AddOption<string>((v) => SetupName = v, "--setupName")
+                    .SetDescription("Name of the output setup file")
+                    .SetArgumentHelpName("NAME");
 
                 AddOption<string>((v) => EulaUrl = v, "--eulaUrl")
                     .SetDescription("Url to End User License Agreement that will be used by the consent window")
