@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -63,9 +62,7 @@ namespace Squirrel.Update.Windows
         private SafeHWND _eulaLinkHwnd;
         private SafeHWND _privacyPolicyLinkHwnd;
         private SafeHWND _termsAndConditionsLinkHwnd;
-        private SafeHWND _bdSdkEulaUrl;
         private SafeHWND _legalInfoText;
-        private SafeHWND _bdSdkLegalNotice;
         private SafeHWND _endFolderNoticeText;
         private SafeHWND _installationNoteText;
 
@@ -279,27 +276,6 @@ namespace Squirrel.Update.Windows
                 instance,
                 IntPtr.Zero);
 
-            _bdSdkLegalNotice = CreateWindow("STATIC",
-                "Viddly installs Bright Data components (no execution).\r\nYou will be able to view the component details in full before you accept this offer, as well as being able to turn Bright Data on and off directly from the 'App Settings'. Read more about Bright Data's EULA",
-                WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
-                leftPadding, 300, 470, 90,
-                _hwnd,
-                HMENU.NULL,
-                instance,
-                IntPtr.Zero);
-
-            var bdSdkEulaUrlX = leftPadding + 275;
-            var bdSdkEulaUrlY = 350;
-
-            _bdSdkEulaUrl = CreateWindow("STATIC",
-                "here",
-                textStyle | WS_CLIPSIBLINGS,
-                bdSdkEulaUrlX, bdSdkEulaUrlY, 30, 20,
-                _hwnd,
-                HMENU.NULL,
-                instance,
-                IntPtr.Zero);
-
             _installationNoteText = CreateWindow("STATIC",
                 "It is not possible to cancel the installation once it has started.",
                 WS_CHILD,
@@ -312,7 +288,6 @@ namespace Squirrel.Update.Windows
             var result = SetWindowSubclass(_eulaLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_privacyPolicyLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_termsAndConditionsLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
-            result = SetWindowSubclass(_bdSdkEulaUrl.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
 
             ShowWindow(_hwnd, ShowWindowCommand.SW_SHOWNOACTIVATE);
 
@@ -329,9 +304,6 @@ namespace Squirrel.Update.Windows
             SendMessage(_endFolderNoticeText,
                 (uint) WM_SETFONT,
                 CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
-            SendMessage(_bdSdkLegalNotice,
-                (uint) WM_SETFONT,
-                CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
             SendMessage(_installationNoteText,
                 (uint) WM_SETFONT,
                 CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
@@ -339,10 +311,6 @@ namespace Squirrel.Update.Windows
             SendMessage(_eulaLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_termsAndConditionsLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_privacyPolicyLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
-            SendMessage(_bdSdkEulaUrl, (uint) WM_SETFONT, linkFont2.DangerousGetHandle(), true);
-
-            // Overlap it
-            SetWindowPos(_bdSdkEulaUrl, HWND.HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
             DeleteObject(guiFont);
         }
@@ -368,8 +336,7 @@ namespace Squirrel.Update.Windows
                 //This is how to change static text foreground and background colors
                 if (lParam == _eulaLinkHwnd.DangerousGetHandle() ||
                    lParam == _privacyPolicyLinkHwnd.DangerousGetHandle() ||
-                   lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle() ||
-                   lParam == _bdSdkEulaUrl.DangerousGetHandle()) 
+                   lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle()) 
                 {
                     SetTextColor(hdc, new COLORREF(0, 0, 255));
                 }
@@ -423,8 +390,6 @@ namespace Squirrel.Update.Windows
                     ShowWindow(_eulaLinkHwnd, ShowWindowCommand.SW_HIDE);
                     ShowWindow(_termsAndConditionsLinkHwnd, ShowWindowCommand.SW_HIDE);
                     ShowWindow(_privacyPolicyLinkHwnd, ShowWindowCommand.SW_HIDE);
-                    ShowWindow(_bdSdkLegalNotice, ShowWindowCommand.SW_HIDE);
-                    ShowWindow(_bdSdkEulaUrl, ShowWindowCommand.SW_HIDE);
 
                     ShowWindow(_endFolderNoticeText, ShowWindowCommand.SW_SHOW);
                     ShowWindow(_installationNoteText, ShowWindowCommand.SW_SHOW);
@@ -465,10 +430,6 @@ namespace Squirrel.Update.Windows
 
             case (uint) WM_COMMAND when lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle():
                 OpenUrl(_termsAndConditionsUrl);
-                break;
-
-            case (uint) WM_COMMAND when lParam == _bdSdkEulaUrl.DangerousGetHandle():
-                OpenUrl("https://brightdata.com/legal/sdk-eula");
                 break;
 
             case (uint) WM_CLOSE:
