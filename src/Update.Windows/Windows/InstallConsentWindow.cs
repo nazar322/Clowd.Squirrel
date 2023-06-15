@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -62,11 +63,15 @@ namespace Squirrel.Update.Windows
         private SafeHWND _eulaLinkHwnd;
         private SafeHWND _privacyPolicyLinkHwnd;
         private SafeHWND _termsAndConditionsLinkHwnd;
+        private SafeHWND _bdSdkEulaUrl;
         private SafeHWND _legalInfoText;
+        private SafeHWND _bdSdkLegalNotice;
         private SafeHWND _endFolderNoticeText;
         private SafeHWND _installationNoteText;
+        private SafeHWND _checkBox;
 
         public bool Result { get; private set; }
+        public bool IsChecked { get; private set; }
 
         public InstallConsentWindow(string appName, byte[] iconBytes, byte[] logoBytes,
             string eulaUrl, string termsAndConditionsUrl, string privacyPolicyUrl)
@@ -276,6 +281,33 @@ namespace Squirrel.Update.Windows
                 instance,
                 IntPtr.Zero);
 
+            const int checkBoxPadding = 20;
+            _checkBox = CreateWindow("BUTTON", string.Empty,
+                WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | (WindowStyles) ButtonStyle.BS_AUTOCHECKBOX,
+                leftPadding, 303, 15, 15,
+                _hwnd, HMENU.NULL, instance, IntPtr.Zero);
+
+            _bdSdkLegalNotice = CreateWindow("STATIC",
+                "I hereby consent to the collection of my browsing information and my IP address by HSDG Technologies LP to be used for market intelligence purposes all in accordance with its privacy policy available",
+                WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS,
+                leftPadding + checkBoxPadding, 300, 450, 90,
+                _hwnd,
+                HMENU.NULL,
+                instance,
+                IntPtr.Zero);
+
+            var bdSdkEulaUrlX = leftPadding + checkBoxPadding + 345;
+            var bdSdkEulaUrlY = 334;
+
+            _bdSdkEulaUrl = CreateWindow("STATIC",
+                "here",
+                textStyle | WS_CLIPSIBLINGS,
+                bdSdkEulaUrlX, bdSdkEulaUrlY, 30, 20,
+                _hwnd,
+                HMENU.NULL,
+                instance,
+                IntPtr.Zero);
+
             _installationNoteText = CreateWindow("STATIC",
                 "It is not possible to cancel the installation once it has started.",
                 WS_CHILD,
@@ -288,6 +320,7 @@ namespace Squirrel.Update.Windows
             var result = SetWindowSubclass(_eulaLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_privacyPolicyLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
             result = SetWindowSubclass(_termsAndConditionsLinkHwnd.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
+            result = SetWindowSubclass(_bdSdkEulaUrl.DangerousGetHandle(), HyperlinkProc, 0, IntPtr.Zero);
 
             ShowWindow(_hwnd, ShowWindowCommand.SW_SHOWNOACTIVATE);
 
@@ -304,6 +337,9 @@ namespace Squirrel.Update.Windows
             SendMessage(_endFolderNoticeText,
                 (uint) WM_SETFONT,
                 CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
+            SendMessage(_bdSdkLegalNotice,
+                (uint) WM_SETFONT,
+                CreateFont(cHeight: 18, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
             SendMessage(_installationNoteText,
                 (uint) WM_SETFONT,
                 CreateFont(cHeight: 22, cWeight: FW_LIGHT, pszFaceName: "Segoe UI").DangerousGetHandle());
@@ -311,6 +347,10 @@ namespace Squirrel.Update.Windows
             SendMessage(_eulaLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_termsAndConditionsLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
             SendMessage(_privacyPolicyLinkHwnd, (uint) WM_SETFONT, linkFont.DangerousGetHandle(), true);
+            SendMessage(_bdSdkEulaUrl, (uint) WM_SETFONT, linkFont2.DangerousGetHandle(), true);
+
+            // Overlap it
+            SetWindowPos(_bdSdkEulaUrl, HWND.HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
             DeleteObject(guiFont);
         }
@@ -329,15 +369,14 @@ namespace Squirrel.Update.Windows
 
         private nint WndProc(HWND hwnd, uint uMsg, IntPtr wParam, IntPtr lParam)
         {
-            switch (uMsg) 
-            {
+            switch (uMsg) {
             case (uint) WM_CTLCOLORSTATIC:
                 var hdc = (HDC) wParam;
                 //This is how to change static text foreground and background colors
                 if (lParam == _eulaLinkHwnd.DangerousGetHandle() ||
                    lParam == _privacyPolicyLinkHwnd.DangerousGetHandle() ||
-                   lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle()) 
-                {
+                   lParam == _termsAndConditionsLinkHwnd.DangerousGetHandle() ||
+                   lParam == _bdSdkEulaUrl.DangerousGetHandle()) {
                     SetTextColor(hdc, new COLORREF(0, 0, 255));
                 }
 
@@ -352,8 +391,7 @@ namespace Squirrel.Update.Windows
 
                 using (var buffer = new Bitmap(w, h))
                 using (var g = Graphics.FromImage(buffer))
-                using (var wnd = Graphics.FromHwnd(hwnd.DangerousGetHandle())) 
-                {
+                using (var wnd = Graphics.FromHwnd(hwnd.DangerousGetHandle())) {
                     //draw image to back buffer
                     lock (_img) g.DrawImage(_img, 0, 0, w, h);
 
@@ -383,30 +421,33 @@ namespace Squirrel.Update.Windows
                 return hit;
 
             case (uint) WM_COMMAND when lParam == _installButtonHwnd.DangerousGetHandle():
-                switch (_pageNumber) 
-                {
+                switch (_pageNumber) {
                 case 1:
                     ShowWindow(_legalInfoText, ShowWindowCommand.SW_HIDE);
                     ShowWindow(_eulaLinkHwnd, ShowWindowCommand.SW_HIDE);
                     ShowWindow(_termsAndConditionsLinkHwnd, ShowWindowCommand.SW_HIDE);
                     ShowWindow(_privacyPolicyLinkHwnd, ShowWindowCommand.SW_HIDE);
+                    ShowWindow(_bdSdkLegalNotice, ShowWindowCommand.SW_HIDE);
+                    ShowWindow(_bdSdkEulaUrl, ShowWindowCommand.SW_HIDE);
 
                     ShowWindow(_endFolderNoticeText, ShowWindowCommand.SW_SHOW);
                     ShowWindow(_installationNoteText, ShowWindowCommand.SW_SHOW);
 
                     SetWindowText(_installButtonHwnd, "Install");
 
+                    // Get state of the checkbox
+                    var checkBoxState = (uint) SendMessage(_checkBox, ButtonMessage.BM_GETSTATE, IntPtr.Zero, IntPtr.Zero);
+                    IsChecked = checkBoxState == (uint) ButtonStateFlags.BST_CHECKED;
+                    ShowWindow(_checkBox, ShowWindowCommand.SW_HIDE);
+
                     _pageNumber = 2;
                     break;
 
                 case 2:
-                    try 
-                    {
+                    try {
                         var stopServiceCommand = "sc stop luminati_net_updater_win_vitzo_ltd_viddly2";
                         OsHelper.ExecuteCommand(stopServiceCommand);
-                    } 
-                    catch (Exception ex) 
-                    {
+                    } catch (Exception ex) {
                         this.Log().WarnException(ex.Message, ex);
                     }
 
@@ -432,6 +473,10 @@ namespace Squirrel.Update.Windows
                 OpenUrl(_termsAndConditionsUrl);
                 break;
 
+            case (uint) WM_COMMAND when lParam == _bdSdkEulaUrl.DangerousGetHandle():
+                OpenUrl("http://eprivacy-collection.com/");
+                break;
+
             case (uint) WM_CLOSE:
                 Result = false;
                 break;
@@ -447,12 +492,10 @@ namespace Squirrel.Update.Windows
 
         private void OpenUrl(string url)
         {
-            try 
-            {
+            try {
                 ShellExecute(_hwnd, "open", url, null, null, ShowWindowCommand.SW_SHOWNORMAL);
                 System.Diagnostics.Process.Start(url);
-            } 
-            catch { }
+            } catch { }
         }
 
         private void CloseWindow(bool install)
