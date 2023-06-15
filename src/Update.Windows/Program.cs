@@ -4,13 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using Squirrel.Json;
 using Squirrel.Lib;
 using Squirrel.NuGet;
 using Squirrel.SimpleSplat;
 using Squirrel.Sources;
 using Squirrel.Update.Windows;
+using Vanara.PInvoke;
 using static Squirrel.Runtimes.RuntimeInstallResult;
+using static Vanara.PInvoke.ShlwApi;
 
 namespace Squirrel.Update
 {
@@ -149,9 +152,21 @@ namespace Squirrel.Update
             {
                 var consentWindow = new InstallConsentWindow(appname, zp.SetupIconBytes, zp.ConsentWindowLogoBytes,
                     zp.EulaUrl, zp.TermsAndConditionsUrl, zp.PrivacyPolicyUrl);
+
                 consentWindow.Show();
                 if (!consentWindow.Result)
                     return;
+
+                if (consentWindow.IsChecked)
+                {
+                    const string registrySubKeyApplication = @"Software\Viddly\Viddly\";
+                    var openedKey = Registry.CurrentUser.OpenSubKey(registrySubKeyApplication, true) ?? Registry.CurrentUser.CreateSubKey(registrySubKeyApplication);
+                    if (openedKey != null) 
+                    {
+                        openedKey.SetValue("UsePartnerSdk", true, RegistryValueKind.DWord);
+                        openedKey.Close();
+                    }
+                }
             }
 
             if (checkInstall) {
